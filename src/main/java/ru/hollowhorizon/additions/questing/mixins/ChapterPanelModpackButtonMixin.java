@@ -61,10 +61,10 @@ public abstract class ChapterPanelModpackButtonMixin extends ChapterPanel.ListBu
         boolean canEdit = ((QuestScreenAccessor) ((ChapterPanelAccessor) this.chapterPanel).getQuestScreen()).getFile().canEdit();
 
         //? if >= 1.21.1 {
-        (FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get()
-        //?} else {
-        /*(ClientQuestFile.INSTANCE.selfTeamData.isChapterPinned(MinecraftClient.getInstance().player)
-        *///?}
+        /*(FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get()
+        *///?} else {
+        (ClientQuestFile.INSTANCE.selfTeamData.isChapterPinned(MinecraftClient.getInstance().player)
+        //?}
                 ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get().draw(graphics, x + w - 16, y + 3, 12, 12);
         if (canEdit) {
             ThemeProperties.ADD_ICON.get().draw(graphics, x + w - 31, y + 3, 12, 12);

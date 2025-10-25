@@ -159,10 +159,10 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         }
 
         //? if >= 1.21.1 {
-        var offset = 900f;
-        //?} else {
-        /*var offset = 0f;
-        *///?}
+        /*var offset = 900f;
+        *///?} else {
+        var offset = 0f;
+        //?}
 
         if (!questIcon.isEmpty()) {
             int s = (int) ((float) w / 8.0F * 3.0F);

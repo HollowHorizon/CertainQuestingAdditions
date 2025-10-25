@@ -9,6 +9,7 @@
     "ChapterPanelAccessor",
     "ChapterPanelChapterButtonMixin",
     "ChapterPanelGroupButtonMixin",
+    "ChapterPanelMixin",
     "ChapterPanelModpackButtonMixin",
     "QuestButtonAccessor",
     "QuestButtonMixin",

@@ -5,6 +5,7 @@
   "certain_questing_additions.animations.panel_button_hover": "Animation on hovering over panel buttons",
   "certain_questing_additions.animations.panel_animation": "Quest panel appearance animation",
   "certain_questing_additions.animations.smooth_scrolling": "Smooth zooming in and out of the quest panel",
+  "certain_questing_additions.animations.smooth_chapter_panel": "Smooth chapter panel opening animation",
 
   "certain_questing_additions.appearance": "Appearance settings",
   "certain_questing_additions.appearance.smooth_animations": "Smooth animations with easing functions",

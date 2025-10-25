@@ -1,7 +1,7 @@
 package ru.hollowhorizon.additions.questing.forge;
 
 //? if forge {
-/*import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -34,6 +34,6 @@ public final class CertainQuestingAdditionsForge {
         })));
     }
 }
-*///?} else {
-public final class CertainQuestingAdditionsForge {}
-//?}
+//?} else {
+/*public final class CertainQuestingAdditionsForge {}
+*///?}

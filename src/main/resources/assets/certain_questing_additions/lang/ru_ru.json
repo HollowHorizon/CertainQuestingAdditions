@@ -5,6 +5,7 @@
   "certain_questing_additions.animations.panel_button_hover": "Анимация при наведении на кнопки панелей",
   "certain_questing_additions.animations.panel_animation": "Анимация появления панели квеста",
   "certain_questing_additions.animations.smooth_scrolling": "Плавное приближение и отдаление панели квестов",
+  "certain_questing_additions.animations.smooth_chapter_panel": "Плавная анимация вкладки с главами",
 
   "certain_questing_additions.appearance": "Настройки внешнего вида",
   "certain_questing_additions.appearance.smooth_animations": "Плавные анимации с easing-функциями",

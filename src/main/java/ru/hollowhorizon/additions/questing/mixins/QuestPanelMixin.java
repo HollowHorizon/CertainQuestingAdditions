@@ -43,10 +43,10 @@ public abstract class QuestPanelMixin extends Panel {
     @Shadow @Final private static ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE;
 
     //? if >= 1.21.1 {
-    @Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
-    //?} else {
-    /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
-    *///?}
+    /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
+    *///?} else {
+    @Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
+    //?}
     public QuestPanelMixin(Panel panel) {
         super(panel);
     }
@@ -57,7 +57,7 @@ public abstract class QuestPanelMixin extends Panel {
         var file = ((QuestScreenAccessor) questScreen).getFile();
 
         //? if >= 1.21.1 {
-        if (selectedChapter != null && file.selfTeamData != null) {
+        /*if (selectedChapter != null && file.selfTeamData != null) {
             Tessellator tesselator = Tessellator.getInstance();
             Icon icon = (Icon)ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(selectedChapter);
             if (icon instanceof ImageIcon) {
@@ -148,8 +148,8 @@ public abstract class QuestPanelMixin extends Panel {
                 QuestShape.get(quest.getShape()).getOutline().withColor(Color4I.BLACK.withAlpha(90)).draw(graphics, qbx.getX(), qbx.getY(), qbx.width, qbx.height);
             });
         }
-        //?} else {
-        /*
+        *///?} else {
+        
 
         if (selectedChapter != null && file.selfTeamData != null) {
             Tessellator tesselator = Tessellator.getInstance();
@@ -247,7 +247,7 @@ public abstract class QuestPanelMixin extends Panel {
             });
 
         }
-        *///?}
+        //?}
 
         ci.cancel();
     }
