@@ -1,0 +1,13 @@
+{
+  "certain_questing_additions": "Некие квестовые дополнения",
+  "certain_questing_additions.animations": "Настройки отдельных анимаций",
+  "certain_questing_additions.animations.quest_hover": "Анимация при наведении на квест",
+  "certain_questing_additions.animations.panel_button_hover": "Анимация при наведении на кнопки панелей",
+  "certain_questing_additions.animations.panel_animation": "Анимация появления панели квеста",
+  "certain_questing_additions.animations.smooth_scrolling": "Плавное приближение и отдаление панели квестов",
+
+  "certain_questing_additions.appearance": "Настройки внешнего вида",
+  "certain_questing_additions.appearance.smooth_animations": "Плавные анимации с easing-функциями",
+  "certain_questing_additions.appearance.button_hover_glow_alpha": "Прозрачность подсветки кнопки при наведении (0-255)",
+  "certain_questing_additions.appearance.quest_hover_glow_alpha": "Прозрачность подсветки квеста при наведении (0-255)"
+}

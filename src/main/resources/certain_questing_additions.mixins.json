@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "package": "ru.hollowhorizon.additions.questing.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "client": [
+  ],
+  "mixins": [
+    "ChapterPanelAccessor",
+    "ChapterPanelChapterButtonMixin",
+    "ChapterPanelGroupButtonMixin",
+    "ChapterPanelModpackButtonMixin",
+    "QuestButtonAccessor",
+    "QuestButtonMixin",
+    "QuestPanelMixin",
+    "QuestScreenAccessor",
+    "QuestScreenMixin",
+    "ViewQuestPanelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "*"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "${id}"
+version = "${version}"
+displayName = "${name}"
+authors = "Meza"
+description = '''
+${description}
+'''
+
+[[mixins]]
+config="certain_questing_additions.mixins.json"
+
+[[dependencies.${id}]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraftVersion},)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${id}]]
+modId = "ftbquests"
+mandatory = true
+versionRange = "[2101.1.15,)"
+ordering = "AFTER"
+side = "BOTH"
