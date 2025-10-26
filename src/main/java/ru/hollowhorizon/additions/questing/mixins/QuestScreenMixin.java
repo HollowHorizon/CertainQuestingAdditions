@@ -1,18 +1,25 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import ru.hollowhorizon.additions.questing.client.Animator;
+import ru.hollowhorizon.additions.questing.client.CustomBackgroundRenderer;
 import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 
@@ -52,6 +59,12 @@ public class QuestScreenMixin implements QuestScreenZoom {
                 hollow$zoomAnimating = false;
             }
         }
+    }
+
+    @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"))
+    private void drawCustomBackground(BaseScreen instance, DrawContext graphics, Theme theme, int x, int y, int w, int h) {
+        QuestPanelAccessor accessor =((QuestPanelAccessor) questPanel);
+        CustomBackgroundRenderer.draw(graphics, x, y, w, h, accessor.getCenterQuestX(), accessor.getCenterQuestY());
     }
 
     @Inject(method = "getQuestButtonSize", at = @At("HEAD"), cancellable = true)

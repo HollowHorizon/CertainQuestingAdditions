@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
+    "DebugMainMixin"
   ],
   "mixins": [
     "ChapterPanelAccessor",
@@ -13,6 +14,7 @@
     "ChapterPanelModpackButtonMixin",
     "QuestButtonAccessor",
     "QuestButtonMixin",
+    "QuestPanelAccessor",
     "QuestPanelMixin",
     "QuestScreenAccessor",
     "QuestScreenMixin",

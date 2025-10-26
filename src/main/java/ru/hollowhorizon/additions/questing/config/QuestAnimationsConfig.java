@@ -16,8 +16,8 @@ public interface QuestAnimationsConfig {
     BooleanValue PANEL_ANIMATION = ANIMATIONS.addBoolean("panel_animation", true);
     BooleanValue SMOOTH_SCROLLING = ANIMATIONS.addBoolean("smooth_scrolling", true);
     //? if <= 1.20.1 {
-    BooleanValue CHAPTER_PANEL = ANIMATIONS.addBoolean("smooth_chapter_panel", true);
-    //?}
+    /*BooleanValue CHAPTER_PANEL = ANIMATIONS.addBoolean("smooth_chapter_panel", true);
+    *///?}
 
     SNBTConfig APPEARANCE = CONFIG.addGroup("appearance");
 

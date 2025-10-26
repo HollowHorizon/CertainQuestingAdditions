@@ -30,8 +30,8 @@ public abstract class ChapterPanelGroupButtonMixin extends ChapterPanel.ListButt
     public ChapterGroup group;
 
     //? if >= 1.21.1 {
-    /*@Shadow @Final private boolean xlateWarning;
-    *///?}
+    @Shadow @Final private boolean xlateWarning;
+    //?}
 
     public ChapterPanelGroupButtonMixin(ChapterPanel panel, Text t, Icon i) {
         super(panel, t, i);
@@ -48,10 +48,10 @@ public abstract class ChapterPanelGroupButtonMixin extends ChapterPanel.ListButt
         var factor = mou$animator.get();
 
         //? if >= 1.21.1 {
-        /*if (this.xlateWarning) {
+        if (this.xlateWarning) {
             Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
         }
-        *///?}
+        //?}
 
         if (factor > 0) {
             Color4I.WHITE.withAlpha((int) (QuestAnimationsConfig.BUTTON_HOVER_GLOW_ALPHA.get() * factor)).draw(graphics, x + 1, y, w - 2, h);

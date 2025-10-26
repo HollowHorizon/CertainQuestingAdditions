@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.hollowhorizon.additions.questing.client.Animator;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
+import ru.hollowhorizon.additions.questing.client.QuestPanelAnimator;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 
 @Mixin(value = QuestButton.class, remap = false)
@@ -159,10 +161,10 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         }
 
         //? if >= 1.21.1 {
-        /*var offset = 900f;
-        *///?} else {
-        var offset = 0f;
-        //?}
+        var offset = 900f;
+        //?} else {
+        /*var offset = 0f;
+        *///?}
 
         if (!questIcon.isEmpty()) {
             int s = (int) ((float) w / 8.0F * 3.0F);
@@ -192,5 +194,10 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         }
 
         ci.cancel();
+    }
+
+    @Inject(method = "onClicked", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;open(Ldev/ftb/mods/ftbquests/quest/QuestObject;Z)V", shift = At.Shift.AFTER))
+    private void cqa$onClicked(MouseButton button, CallbackInfo ci) {
+        ((QuestPanelAnimator) questScreen.viewQuestPanel).cqa$triggerAnimation();
     }
 }

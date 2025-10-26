@@ -20,7 +20,7 @@ public abstract class ChapterPanelMixin extends Panel {
     }
 
     //? if <= 1.20.1 {
-    @Shadow
+    /*@Shadow
     boolean expanded;
     @Unique
     private int cqa$curX;
@@ -51,5 +51,5 @@ public abstract class ChapterPanelMixin extends Panel {
         cir.setReturnValue(MathHelper.lerp(MinecraftClient.getInstance().getTickDelta(), cqa$prevX, cqa$curX));
     }
 
-    //?}
+    *///?}
 }

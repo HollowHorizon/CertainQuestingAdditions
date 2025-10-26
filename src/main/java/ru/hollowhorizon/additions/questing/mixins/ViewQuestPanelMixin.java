@@ -10,10 +10,11 @@ import net.minecraft.client.gui.DrawContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import ru.hollowhorizon.additions.questing.client.Animator;
+import ru.hollowhorizon.additions.questing.client.QuestPanelAnimator;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 
 @Mixin(value = ViewQuestPanel.class, remap = false)
-public abstract class ViewQuestPanelMixin extends ModalPanel {
+public abstract class ViewQuestPanelMixin extends ModalPanel implements QuestPanelAnimator {
 
     @Unique
     private final Animator mou$animator = new Animator(0f, 0.3f, (i) -> 1 - (1 - i) * (1 - i) * (1 - i));
@@ -23,8 +24,7 @@ public abstract class ViewQuestPanelMixin extends ModalPanel {
     }
 
     @Override
-    public void refreshWidgets() {
-        super.refreshWidgets();
+    public void cqa$triggerAnimation() {
         mou$animator.set(1f, 0f);
     }
 

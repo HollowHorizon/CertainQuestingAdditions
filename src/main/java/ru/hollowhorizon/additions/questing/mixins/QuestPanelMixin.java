@@ -1,7 +1,5 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -24,11 +22,9 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import ru.hollowhorizon.additions.questing.client.Animator;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
 import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
@@ -43,10 +39,10 @@ public abstract class QuestPanelMixin extends Panel {
     @Shadow @Final private static ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE;
 
     //? if >= 1.21.1 {
-    /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
-    *///?} else {
-    @Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
-    //?}
+    @Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
+    //?} else {
+    /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
+    *///?}
     public QuestPanelMixin(Panel panel) {
         super(panel);
     }
@@ -57,7 +53,7 @@ public abstract class QuestPanelMixin extends Panel {
         var file = ((QuestScreenAccessor) questScreen).getFile();
 
         //? if >= 1.21.1 {
-        /*if (selectedChapter != null && file.selfTeamData != null) {
+        if (selectedChapter != null && file.selfTeamData != null) {
             Tessellator tesselator = Tessellator.getInstance();
             Icon icon = (Icon)ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(selectedChapter);
             if (icon instanceof ImageIcon) {
@@ -96,7 +92,8 @@ public abstract class QuestPanelMixin extends Panel {
                         }
 
                         for(QuestButton button : qb.getDependencies()) {
-                            if (button.shouldDraw() && quest != selectedQuest && !quest.shouldHideDependentLines()) {
+                            var dependentQuest = ((QuestButtonAccessor) button).getQuest();
+                            if (button.shouldDraw() && quest != selectedQuest && dependentQuest != selectedQuest && !dependentQuest.shouldHideDependentLines()) {
                                 this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu, tesselator);
                             }
                         }
@@ -148,10 +145,10 @@ public abstract class QuestPanelMixin extends Panel {
                 QuestShape.get(quest.getShape()).getOutline().withColor(Color4I.BLACK.withAlpha(90)).draw(graphics, qbx.getX(), qbx.getY(), qbx.width, qbx.height);
             });
         }
-        *///?} else {
+        //?} else {
         
 
-        if (selectedChapter != null && file.selfTeamData != null) {
+        /*if (selectedChapter != null && file.selfTeamData != null) {
             Tessellator tesselator = Tessellator.getInstance();
             BufferBuilder buffer = tesselator.getBuffer();
             Icon icon = (Icon) ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(selectedChapter);
@@ -190,7 +187,8 @@ public abstract class QuestPanelMixin extends Panel {
                         }
 
                         for(QuestButton button : qb.getDependencies()) {
-                            if (button.shouldDraw() && quest != selectedQuest && quest != selectedQuest && !quest.shouldHideDependentLines()) {
+                            var dependentQuest = ((QuestButtonAccessor) button).getQuest();
+                            if (button.shouldDraw() && quest != selectedQuest && dependentQuest != selectedQuest && !dependentQuest.shouldHideDependentLines()) {
                                 this.renderConnection(widget, button, graphics.getMatrices(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu, tesselator);
                             }
                         }
@@ -247,7 +245,7 @@ public abstract class QuestPanelMixin extends Panel {
             });
 
         }
-        //?}
+        *///?}
 
         ci.cancel();
     }

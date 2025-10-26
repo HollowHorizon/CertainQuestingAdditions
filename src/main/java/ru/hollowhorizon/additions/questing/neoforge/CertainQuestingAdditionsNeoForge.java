@@ -1,7 +1,7 @@
 package ru.hollowhorizon.additions.questing.neoforge;
 
 //? if neoforge {
-/*import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.ServerCommandSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.Mod;
@@ -29,6 +29,6 @@ public class CertainQuestingAdditionsNeoForge {
         })));
     }
 }
-*///?} else {
-public final class CertainQuestingAdditionsNeoForge {}
-//?}
+//?} else {
+/*public final class CertainQuestingAdditionsNeoForge {}
+*///?}

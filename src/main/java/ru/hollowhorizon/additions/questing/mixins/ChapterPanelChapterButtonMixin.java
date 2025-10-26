@@ -33,10 +33,10 @@ public abstract class ChapterPanelChapterButtonMixin extends ChapterPanel.ListBu
     private Chapter chapter;
 
     //? if >= 1.21.1 {
-    /*@Shadow @Final private boolean xlateWarningTitle;
+    @Shadow @Final private boolean xlateWarningTitle;
 
     @Shadow @Final private boolean xlateWarningSubtitle;
-    *///?}
+    //?}
 
     public ChapterPanelChapterButtonMixin(ChapterPanel panel, Text t, Icon i) {
         super(panel, t, i);
@@ -53,10 +53,10 @@ public abstract class ChapterPanelChapterButtonMixin extends ChapterPanel.ListBu
         var factor = mou$animator.get();
 
         //? if >=1.21.1 {
-        /*if (this.xlateWarningTitle || this.xlateWarningSubtitle) {
+        if (this.xlateWarningTitle || this.xlateWarningSubtitle) {
             Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
         }
-        *///?}
+        //?}
 
         if (factor > 0f) {
             Color4I.WHITE.withAlpha((int) (QuestAnimationsConfig.BUTTON_HOVER_GLOW_ALPHA.get() * factor)).draw(graphics, x + 1, y, w - 2, h);
