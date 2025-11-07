@@ -11,4 +11,6 @@ public interface QuestPanelAccessor {
 
     @Accessor("centerQuestY")
     double getCenterQuestY();
+
+
 }

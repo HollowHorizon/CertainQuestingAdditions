@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.bundling.Zip
+import org.gradle.kotlin.dsl.invoke
+
 plugins {
     id("gg.meza.stonecraft")
 }
@@ -42,4 +45,54 @@ dependencies {
             }
         }
     }
+}
+
+val supportedPackFormats = listOf(15, 18, 22, 34)
+val templatesDir = rootProject.layout.projectDirectory.dir("templates")
+val outputDir = rootProject.layout.buildDirectory.dir("resourcepacks")
+val targetShaderPath = "assets/certain_questing_additions/shaders/core/custom_background.fsh"
+
+val zipTaskNames = mutableListOf<String>()
+
+templatesDir.asFileTree.files.filter { it.name.endsWith(".glsl") }.forEach { shaderFile ->
+    val shaderName = shaderFile.nameWithoutExtension
+    val taskName = "zipResourcePack${shaderName.capitalize()}"
+    val packDescription = "Шейдер '$shaderName' (1.20.1 - 1.21.1)"
+
+    tasks.register<Zip>(taskName) {
+        archiveFileName.set("resourcepack-${shaderName}-1.20_1.21.zip")
+        destinationDirectory.set(outputDir)
+
+        from(templatesDir) {
+            include(shaderFile.name)
+            rename { targetShaderPath }
+        }
+
+        val formatsArray = supportedPackFormats.joinToString(prefix = "[", separator = ", ", postfix = "]")
+
+        val mcMetaContent = """
+            {
+              "pack": {
+                "pack_format": $formatsArray,
+                "description": "$packDescription"
+              }
+            }
+        """.trimIndent()
+
+        val mcMetaFile = temporaryDir.resolve("pack.mcmeta").apply {
+            writeText(mcMetaContent)
+        }
+
+        from(mcMetaFile) {
+            rename { "pack.mcmeta" }
+        }
+    }
+    zipTaskNames.add(taskName)
+}
+
+tasks.register("createMultiVersionResourcePacks") {
+    group = "resourcepack"
+    description = "Создает мультиверсионные ресурспаки (1.20.1 - 1.21.1) для каждого шейдера."
+
+    dependsOn(zipTaskNames)
 }

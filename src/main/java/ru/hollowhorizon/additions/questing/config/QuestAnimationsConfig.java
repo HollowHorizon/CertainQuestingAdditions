@@ -15,6 +15,7 @@ public interface QuestAnimationsConfig {
     BooleanValue PANEL_BUTTON_HOVER = ANIMATIONS.addBoolean("panel_button_hover", true);
     BooleanValue PANEL_ANIMATION = ANIMATIONS.addBoolean("panel_animation", true);
     BooleanValue SMOOTH_SCROLLING = ANIMATIONS.addBoolean("smooth_scrolling", true);
+
     //? if <= 1.20.1 {
     /*BooleanValue CHAPTER_PANEL = ANIMATIONS.addBoolean("smooth_chapter_panel", true);
     *///?}
@@ -22,6 +23,7 @@ public interface QuestAnimationsConfig {
     SNBTConfig APPEARANCE = CONFIG.addGroup("appearance");
 
     BooleanValue SMOOTH_ANIMATIONS = APPEARANCE.addBoolean("smooth_animations", true);
+    BooleanValue SHADER_BACKGROUND = APPEARANCE.addBoolean("shader_background", false);
     IntValue BUTTON_HOVER_GLOW_ALPHA = APPEARANCE.addInt("button_hover_glow_alpha", 40)
             .range(0, 255);
     IntValue QUEST_HOVER_GLOW_ALPHA = APPEARANCE.addInt("quest_hover_glow_alpha", 100)

@@ -24,7 +24,7 @@ import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 
 @Mixin(value = QuestScreen.class, remap = false)
-public class QuestScreenMixin implements QuestScreenZoom {
+public abstract class QuestScreenMixin extends BaseScreen implements QuestScreenZoom {
     @Unique
     private final Animator hollow$zoomAnimator = new Animator(16f, 0.075f, f -> f);
     @Shadow
@@ -32,6 +32,10 @@ public class QuestScreenMixin implements QuestScreenZoom {
     public QuestPanel questPanel;
     @Shadow
     Chapter selectedChapter;
+    @Shadow
+    int zoom;
+    @Shadow private double scrollWidth;
+    @Shadow private double scrollHeight;
     @Unique
     private boolean hollow$zoomAnimating = false;
 
@@ -63,8 +67,11 @@ public class QuestScreenMixin implements QuestScreenZoom {
 
     @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"))
     private void drawCustomBackground(BaseScreen instance, DrawContext graphics, Theme theme, int x, int y, int w, int h) {
-        QuestPanelAccessor accessor =((QuestPanelAccessor) questPanel);
-        CustomBackgroundRenderer.draw(graphics, x, y, w, h, accessor.getCenterQuestX(), accessor.getCenterQuestY());
+        if (QuestAnimationsConfig.SHADER_BACKGROUND.get()) {
+            CustomBackgroundRenderer.draw(graphics, x, y, w, h, questPanel.getScrollX(), questPanel.getScrollY(), scrollWidth, scrollHeight, cqa$getZoom());
+        } else {
+            super.drawBackground(graphics, theme, x, y, w, h);
+        }
     }
 
     @Inject(method = "getQuestButtonSize", at = @At("HEAD"), cancellable = true)
