@@ -9,6 +9,7 @@
 
   "certain_questing_additions.appearance": "Appearance settings",
   "certain_questing_additions.appearance.smooth_animations": "Smooth animations with easing functions",
+  "certain_questing_additions.appearance.shader_background": "Shader background for quest screen",
   "certain_questing_additions.appearance.button_hover_glow_alpha": "Button hover glow opacity (0-255)",
   "certain_questing_additions.appearance.quest_hover_glow_alpha": "Quest hover glow opacity (0-255)"
 }

@@ -7,6 +7,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,7 +23,8 @@ import java.io.IOException;
 
 @Mod(CertainQuestingAdditions.MOD_ID)
 public final class CertainQuestingAdditionsForge {
-    public CertainQuestingAdditionsForge(IEventBus modBus) {
+    public CertainQuestingAdditionsForge() {
+        var modBus = FMLJavaModLoadingContext.get().getModEventBus();
         // Submit our event bus to let Architectury API register our content on the right time.
         EventBuses.registerModEventBus(CertainQuestingAdditions.MOD_ID, modBus);
 

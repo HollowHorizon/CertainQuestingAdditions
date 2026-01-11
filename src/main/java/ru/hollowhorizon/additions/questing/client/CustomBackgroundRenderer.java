@@ -24,13 +24,13 @@ public class CustomBackgroundRenderer {
         buffer.vertex(matrix, x + w, y, 0f).texture(1f, 0f);
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         //?} else {
-        /*
-        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        
+        /*BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        buffer.vertex(matrix, x,     y,     0f).texture(0f, 0f);
-        buffer.vertex(matrix, x,     y + h, 0f).texture(0f, 1f);
-        buffer.vertex(matrix, x + w, y + h, 0f).texture(1f, 1f);
-        buffer.vertex(matrix, x + w, y,     0f).texture(1f, 0f);
+        buffer.vertex(matrix, x,     y,     0f).texture(0f, 0f).next();
+        buffer.vertex(matrix, x,     y + h, 0f).texture(0f, 1f).next();
+        buffer.vertex(matrix, x + w, y + h, 0f).texture(1f, 1f).next();
+        buffer.vertex(matrix, x + w, y,     0f).texture(1f, 0f).next();
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         *///?}
     }

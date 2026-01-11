@@ -9,6 +9,7 @@
 
   "certain_questing_additions.appearance": "Настройки внешнего вида",
   "certain_questing_additions.appearance.smooth_animations": "Плавные анимации с easing-функциями",
+  "certain_questing_additions.appearance.shader_background": "Шейдер для фона экрана квестов",
   "certain_questing_additions.appearance.button_hover_glow_alpha": "Прозрачность подсветки кнопки при наведении (0-255)",
   "certain_questing_additions.appearance.quest_hover_glow_alpha": "Прозрачность подсветки квеста при наведении (0-255)"
 }

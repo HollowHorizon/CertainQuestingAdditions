@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.kotlin.dsl.compileOnly
 import org.gradle.kotlin.dsl.invoke
 
 plugins {
@@ -6,6 +7,7 @@ plugins {
 }
 
 repositories {
+    maven("https://maven.terraformersmc.com/")
     flatDir {
         dirs(rootDir.resolve("libs"))
     }
@@ -14,6 +16,9 @@ repositories {
 dependencies {
     val platform = stonecutter.current.project.substringAfterLast('-')
     val version = stonecutter.current.project.substringBeforeLast('-')
+
+    modCompileOnly("dev.emi:emi-$platform:1.1.22+$version:api")
+    modRuntimeOnly("dev.emi:emi-$platform:1.1.22+$version")
 
     when (version) {
         "1.20.1" -> {

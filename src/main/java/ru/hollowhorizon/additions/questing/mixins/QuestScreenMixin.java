@@ -65,7 +65,7 @@ public abstract class QuestScreenMixin extends BaseScreen implements QuestScreen
         }
     }
 
-    @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"))
+    @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"), remap = true)
     private void drawCustomBackground(BaseScreen instance, DrawContext graphics, Theme theme, int x, int y, int w, int h) {
         if (QuestAnimationsConfig.SHADER_BACKGROUND.get()) {
             CustomBackgroundRenderer.draw(graphics, x, y, w, h, questPanel.getScrollX(), questPanel.getScrollY(), scrollWidth, scrollHeight, cqa$getZoom());
