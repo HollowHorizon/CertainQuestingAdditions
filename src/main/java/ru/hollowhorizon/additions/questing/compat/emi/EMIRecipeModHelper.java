@@ -7,10 +7,15 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.item.ItemStack;
+import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
 
 public final class EMIRecipeModHelper implements RecipeModHelper {
     public static void setRecipeModHelper() {
-        FTBQuests.setRecipeModHelper(new EMIRecipeModHelper());
+        try {
+            FTBQuests.setRecipeModHelper(new EMIRecipeModHelper());
+        } catch (IllegalStateException e) {
+            CertainQuestingAdditions.LOGGER.warn("Failed to set recipe mod helper, there is already helper ({}) set by another mod.", FTBQuests.getRecipeModHelper().getClass().getSimpleName());
+        }
     }
 
     @Override
