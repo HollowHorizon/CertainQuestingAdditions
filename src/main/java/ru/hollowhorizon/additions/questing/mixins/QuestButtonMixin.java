@@ -115,6 +115,17 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         float dx = (w * scale - w) / 2f;
         float dy = (h * scale - h) / 2f;
 
+        // Draw selected/viewed quest indicator BEFORE main shape to avoid overlapping quest details text
+        if (this.questScreen.getViewedQuest() == this.quest || selectedObjects.contains(this.moveAndDeleteFocus())) {
+            poseStack.push();
+            poseStack.translate(x - dx, y - dy, -1.0F);
+            poseStack.scale(scale, scale, scale);
+            Color4I col = Color4I.WHITE.withAlpha((int) ((double) 190.0F + Math.sin((double) System.currentTimeMillis() * 0.003) * (double) 50.0F));
+            shape.getOutline().withColor(col).draw(graphics, 0, 0, w, h);
+            shape.getBackground().withColor(col).draw(graphics, 0, 0, w, h);
+            poseStack.pop();
+        }
+
         if (shape.shouldDraw()) {
             poseStack.push();
             poseStack.translate(x - dx, y - dy, 0);
@@ -136,15 +147,6 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         }
 
         GuiHelper.setupDrawing();
-        if (this.questScreen.getViewedQuest() == this.quest || selectedObjects.contains(this.moveAndDeleteFocus())) {
-            poseStack.push();
-            poseStack.translate(x - dx, y - dy, 1.0F);
-            poseStack.scale(scale, scale, scale);
-            Color4I col = Color4I.WHITE.withAlpha((int) ((double) 190.0F + Math.sin((double) System.currentTimeMillis() * 0.003) * (double) 50.0F));
-            shape.getOutline().withColor(col).draw(graphics, 0, 0, w, h);
-            shape.getBackground().withColor(col).draw(graphics, 0, 0, w, h);
-            poseStack.pop();
-        }
 
         if (!canStart || !teamData.areDependenciesComplete(this.quest)) {
             if (shape.shouldDraw()) {

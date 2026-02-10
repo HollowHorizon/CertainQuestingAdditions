@@ -6,6 +6,17 @@ plugins {
     id("gg.meza.stonecraft")
 }
 
+// Configure MixinConfigs in MANIFEST for Forge/NeoForge
+afterEvaluate {
+    tasks.withType<Jar> {
+        manifest {
+            attributes(
+                "MixinConfigs" to "certain_questing_additions.mixins.json"
+            )
+        }
+    }
+}
+
 repositories {
     maven("https://maven.terraformersmc.com/")
     flatDir {
