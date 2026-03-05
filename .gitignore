@@ -61,6 +61,7 @@ run/
 builded_hc/
 logs/
 !gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
 !*/libs/*
 !libs/*
 !libs/trove-1.0.2.jar
