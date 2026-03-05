@@ -138,9 +138,12 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
 
         if (!this.icon.isEmpty()) {
             int s = (int) ((float) w * 0.6666667F * (float) this.quest.getIconScale());
+            float iconX = x + (w - s) / 2.0F;
+            float iconY = y + (h - s) / 2.0F;
+            float iconDx = (s * scale - s) / 2.0F;
+            float iconDy = (s * scale - s) / 2.0F;
             poseStack.push();
-            poseStack.translate((double) x + (double) (w - s) / (double) 2.0F, (double) y + (double) (h - s) / (double) 2.0F, (double) 0.0F);
-            poseStack.translate(-dx, -dy, 0);
+            poseStack.translate(iconX - iconDx, iconY - iconDy, 0.0F);
             poseStack.scale(scale, scale, scale);
             this.icon.draw(graphics, 0, 0, s, s);
             poseStack.pop();
