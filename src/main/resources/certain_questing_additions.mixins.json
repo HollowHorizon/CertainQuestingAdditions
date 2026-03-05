@@ -12,6 +12,7 @@
     "ChapterPanelGroupButtonMixin",
     "ChapterPanelMixin",
     "ChapterPanelModpackButtonMixin",
+    "ImageIconMixin",
     "QuestButtonAccessor",
     "QuestButtonMixin",
     "QuestPanelAccessor",
