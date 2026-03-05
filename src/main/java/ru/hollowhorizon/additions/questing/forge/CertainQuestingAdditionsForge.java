@@ -16,6 +16,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraftforge.fml.common.Mod;
+import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 import ru.hollowhorizon.additions.questing.registry.ModShaders;
 
@@ -34,10 +35,12 @@ public final class CertainQuestingAdditionsForge {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             MinecraftForge.EVENT_BUS.addListener(CertainQuestingAdditionsForge::onRegisterCommands);
             modBus.addListener((RegisterShadersEvent event) -> {
-                try {
-                    event.registerShader(new ShaderProgram(event.getResourceProvider(), Identifier.parse("certain_questing_additions:custom_background"), VertexFormats.POSITION_TEXTURE), shader -> ModShaders.background = shader);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
+                    try {
+                        event.registerShader(new ShaderProgram(event.getResourceProvider(), shaderId, VertexFormats.POSITION_TEXTURE), shader -> ModShaders.register(shaderId, shader));
+                    } catch (IOException e) {
+                        CertainQuestingAdditions.LOGGER.warn("Failed to register shader {}", shaderId, e);
+                    }
                 }
             });
         }

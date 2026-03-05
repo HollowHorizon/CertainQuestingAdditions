@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
+import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 import ru.hollowhorizon.additions.questing.registry.ModShaders;
 
@@ -22,7 +23,9 @@ public final class CertainQuestingAdditionsFabricClient implements ClientModInit
             })));
         });
         CoreShaderRegistrationCallback.EVENT.register((CoreShaderRegistrationCallback.RegistrationContext context) -> {
-            context.register(Identifier.tryParse("certain_questing_additions:custom_background"), VertexFormats.POSITION_TEXTURE, shader -> ModShaders.background = shader);
+            for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
+                context.register(shaderId, VertexFormats.POSITION_TEXTURE, shader -> ModShaders.register(shaderId, shader));
+            }
         });
     }
 }

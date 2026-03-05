@@ -1,6 +1,7 @@
 package ru.hollowhorizon.additions.questing.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.ftb.mods.ftbquests.quest.Chapter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.DrawContext;
@@ -10,8 +11,12 @@ import ru.hollowhorizon.additions.questing.registry.ModShaders;
 
 
 public class CustomBackgroundRenderer {
-    public static void draw(DrawContext graphics, int x, int y, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
-        var shader = ModShaders.background;
+    public static void draw(DrawContext graphics, Chapter selectedChapter, int x, int y, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
+        var shaderId = ChapterShaderConfig.resolveShaderId(selectedChapter);
+        var shader = ModShaders.get(shaderId);
+        if (shader == null) {
+            return;
+        }
 
         RenderSystem.setShader(() -> shader);
         setupUniforms(shader, w, h, centerX, centerY, scrollWidth, scrollHeight, zoom);

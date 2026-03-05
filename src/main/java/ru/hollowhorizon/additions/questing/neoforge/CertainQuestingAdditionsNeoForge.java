@@ -15,6 +15,7 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
+import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 import ru.hollowhorizon.additions.questing.registry.ModShaders;
 
@@ -29,10 +30,12 @@ public class CertainQuestingAdditionsNeoForge {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             NeoForge.EVENT_BUS.addListener(CertainQuestingAdditionsNeoForge::onRegisterCommands);
             modBus.addListener((RegisterShadersEvent event) -> {
-                try {
-                    event.registerShader(new ShaderProgram(event.getResourceProvider(), Identifier.of("certain_questing_additions:custom_background"), VertexFormats.POSITION_TEXTURE), shader -> ModShaders.background = shader);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
+                    try {
+                        event.registerShader(new ShaderProgram(event.getResourceProvider(), shaderId, VertexFormats.POSITION_TEXTURE), shader -> ModShaders.register(shaderId, shader));
+                    } catch (IOException e) {
+                        CertainQuestingAdditions.LOGGER.warn("Failed to register shader {}", shaderId, e);
+                    }
                 }
             });
         }
