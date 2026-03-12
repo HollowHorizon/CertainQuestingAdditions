@@ -20,6 +20,7 @@ import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
 import ru.hollowhorizon.additions.questing.mixins.ButtonAccessor;
+import ru.hollowhorizon.additions.questing.mixins.QuestScreenAccessor;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -65,7 +66,7 @@ public final class ApngTextureManager {
 
         Set<Identifier> textures = new HashSet<>();
         collectPanelTextures(screen.questPanel, textures);
-        collectChapterThemeTextures(screen.getSelectedChapter().orElse(null), textures);
+        collectChapterThemeTextures(getSelectedChapter(screen), textures);
         replaceScope(ApngScope.QUEST_SCREEN_CANVAS, textures);
     }
 
@@ -511,7 +512,7 @@ public final class ApngTextureManager {
             collectIcon(((ButtonAccessor) button).cqa$getIcon(), textures);
         } else if (widget instanceof ImageComponentWidget imageWidget) {
             ImageComponent component = imageWidget.getComponent();
-            collectIcon(component.getImage(), textures);
+            collectIcon(getComponentImage(component), textures);
         }
 
         if (widget instanceof Panel nestedPanel) {
@@ -547,7 +548,7 @@ public final class ApngTextureManager {
             if (widget instanceof Button button) {
                 mergePriority(priorities, ((ButtonAccessor) button).cqa$getIcon(), priority);
             } else if (widget instanceof ImageComponentWidget imageWidget) {
-                mergePriority(priorities, imageWidget.getComponent().getImage(), priority);
+                mergePriority(priorities, getComponentImage(imageWidget.getComponent()), priority);
             }
         }
 
@@ -588,6 +589,22 @@ public final class ApngTextureManager {
 
         Resource resource = client.getResourceManager().getResource(textureId).orElse(null);
         return resource != null ? resource.getInputStream() : null;
+    }
+
+    private static Icon getComponentImage(ImageComponent component) {
+        //? if >= 1.21.1 {
+        return component.getImage();
+        //?} else {
+        /*return component.image;
+        *///?}
+    }
+
+    private static Chapter getSelectedChapter(QuestScreen screen) {
+        //? if >= 1.21.1 {
+        return screen.getSelectedChapter().orElse(null);
+        //?} else {
+        /*return ((QuestScreenAccessor) screen).getSelectedChapter();
+        *///?}
     }
 
     private static Identifier dynamicTextureId(Identifier textureId) {
