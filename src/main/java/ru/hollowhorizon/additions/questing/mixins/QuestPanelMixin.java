@@ -1,5 +1,7 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -15,7 +17,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
 import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
@@ -45,6 +47,16 @@ public abstract class QuestPanelMixin extends Panel {
     *///?}
     public QuestPanelMixin(Panel panel) {
         super(panel);
+    }
+
+    @WrapMethod(method = "draw")
+    private void cqa$withApngScope(DrawContext graphics, Theme theme, int x, int y, int w, int h, Operation<Void> original) {
+        ApngTextureManager.pushScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
+        try {
+            original.call(graphics, theme, x, y, w, h);
+        } finally {
+            ApngTextureManager.popScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
+        }
     }
 
     @Inject(method = "drawOffsetBackground", at = @At("HEAD"), cancellable = true)

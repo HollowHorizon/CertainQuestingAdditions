@@ -6,9 +6,14 @@ import dev.ftb.mods.ftblibrary.ui.ModalPanel;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
+import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.client.gui.DrawContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
 import ru.hollowhorizon.additions.questing.client.Animator;
 import ru.hollowhorizon.additions.questing.client.QuestPanelAnimator;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
@@ -30,14 +35,37 @@ public abstract class ViewQuestPanelMixin extends ModalPanel implements QuestPan
 
     @WrapMethod(method = "draw")
     private void onDraw(DrawContext graphics, Theme theme, int x, int y, int w, int h, Operation<Void> original) {
-        if(!QuestAnimationsConfig.PANEL_ANIMATION.get()) {
-            original.call(graphics, theme, x, y, w, h);
-            return;
-        }
+        ViewQuestPanel panel = (ViewQuestPanel) (Object) this;
+        ApngTextureManager.syncDetailsScope(panel);
+        ApngTextureManager.pushScope(ApngTextureManager.ApngScope.QUEST_DETAILS_PANEL);
+        int originalY = getY();
+        try {
+            if(!QuestAnimationsConfig.PANEL_ANIMATION.get()) {
+                original.call(graphics, theme, x, y, w, h);
+                return;
+            }
 
-        mou$animator.update();
-        setY(y + Math.round(20f - 20f * mou$animator.get()));
-        original.call(graphics, theme, x, y + Math.round(20f - 20f * mou$animator.get()), w, h);
-        setY(y);
+            mou$animator.update();
+            setY(y + Math.round(20f - 20f * mou$animator.get()));
+            original.call(graphics, theme, x, y + Math.round(20f - 20f * mou$animator.get()), w, h);
+        } finally {
+            setY(originalY);
+            ApngTextureManager.popScope(ApngTextureManager.ApngScope.QUEST_DETAILS_PANEL);
+        }
+    }
+
+    @Inject(method = "onClosed", at = @At("TAIL"))
+    private void cqa$closeDetailsApngScope(CallbackInfo ci) {
+        ApngTextureManager.closeDetailsScope();
+    }
+
+    @Inject(method = "setViewedQuest", at = @At("TAIL"))
+    private void cqa$syncApngScopeOnQuestChange(Quest quest, CallbackInfo ci) {
+        ViewQuestPanel panel = (ViewQuestPanel) (Object) this;
+        if (quest == null) {
+            ApngTextureManager.closeDetailsScope();
+        } else {
+            ApngTextureManager.syncDetailsScope(panel);
+        }
     }
 }

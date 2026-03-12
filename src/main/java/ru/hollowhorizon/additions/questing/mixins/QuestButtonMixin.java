@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
 import ru.hollowhorizon.additions.questing.client.Animator;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
 import ru.hollowhorizon.additions.questing.client.QuestPanelAnimator;
@@ -59,6 +60,8 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
     @Inject(method = "draw", at = @At("HEAD"), cancellable = true)
     private void onDraw(DrawContext graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
         if(!QuestAnimationsConfig.QUEST_HOVER.get()) return;
+        ApngTextureManager.pushScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
+        try {
 
         if (isMouseOver()) cqa$animator.set(1f);
         else cqa$animator.set(0.0f);
@@ -199,6 +202,9 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         }
 
         ci.cancel();
+        } finally {
+            ApngTextureManager.popScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
+        }
     }
 
     @Inject(method = "onClicked", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;open(Ldev/ftb/mods/ftbquests/quest/QuestObject;Z)V", shift = At.Shift.AFTER))

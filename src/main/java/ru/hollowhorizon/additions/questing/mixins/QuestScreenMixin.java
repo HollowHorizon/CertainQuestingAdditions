@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
 import ru.hollowhorizon.additions.questing.client.Animator;
 import ru.hollowhorizon.additions.questing.client.CustomBackgroundRenderer;
 import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
@@ -52,6 +52,8 @@ public abstract class QuestScreenMixin extends BaseScreen implements QuestScreen
 
     @Inject(method = "drawBackground", at = @At("HEAD"), remap = false)
     private void onDraw(CallbackInfo ci) {
+        ApngTextureManager.updateCanvasPlayback((QuestScreen) (Object) this);
+
         if (hollow$zoomAnimating && QuestAnimationsConfig.SMOOTH_SCROLLING.get()) {
             hollow$zoomAnimator.update();
 
@@ -63,6 +65,21 @@ public abstract class QuestScreenMixin extends BaseScreen implements QuestScreen
                 hollow$zoomAnimating = false;
             }
         }
+    }
+
+    @Inject(method = "refreshQuestPanel", at = @At("TAIL"), remap = false)
+    private void cqa$prefetchApngCanvas(CallbackInfo ci) {
+        ApngTextureManager.prefetchCanvas((QuestScreen) (Object) this);
+    }
+
+    @Inject(method = "selectChapter", at = @At("TAIL"), remap = false)
+    private void cqa$prefetchApngOnChapterChange(Chapter chapter, CallbackInfo ci) {
+        ApngTextureManager.prefetchCanvas((QuestScreen) (Object) this);
+    }
+
+    @Inject(method = "onClosed", at = @At("TAIL"), remap = false)
+    private void cqa$clearApngTextures(CallbackInfo ci) {
+        ApngTextureManager.clearCache();
     }
 
     @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"), remap = true)

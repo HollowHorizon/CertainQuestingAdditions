@@ -6,8 +6,10 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -26,7 +28,7 @@ public final class ApngParser {
     private ApngParser() {
     }
 
-    public static ParsedApng parse(InputStream stream) throws IOException {
+    public static DiscoveredApng discover(InputStream stream) throws IOException {
         DataInputStream in = new DataInputStream(stream);
         byte[] signature = in.readNBytes(8);
         if (!Arrays.equals(signature, PNG_SIGNATURE)) {
@@ -35,106 +37,109 @@ public final class ApngParser {
 
         byte[] ihdr = null;
         boolean hasAnimationControl = false;
-        List<Chunk> sharedChunks = new ArrayList<>();
-        List<RawFrame> frames = new ArrayList<>();
+        int frameCount = 0;
+        long totalDurationMs = 0L;
+        List<SharedChunk> sharedChunks = new ArrayList<>();
         RawFrame current = null;
 
         while (true) {
-            int length;
-            try {
-                length = in.readInt();
-            } catch (IOException ignored) {
+            Chunk chunk = readChunk(in);
+            if (chunk == null) {
                 break;
             }
 
-            byte[] typeBytes = in.readNBytes(4);
-            if (typeBytes.length < 4) {
-                break;
-            }
-
-            String type = new String(typeBytes, StandardCharsets.US_ASCII);
-            byte[] data = in.readNBytes(length);
-            in.readInt();
-
-            switch (type) {
-                case "IHDR" -> ihdr = data;
+            switch (chunk.type) {
+                case "IHDR" -> ihdr = chunk.data;
                 case "acTL" -> hasAnimationControl = true;
                 case "fcTL" -> {
                     if (ihdr == null) {
                         return null;
                     }
+
                     if (current != null && current.hasData()) {
-                        frames.add(current);
+                        frameCount++;
+                        totalDurationMs += Math.max(1, current.control.delayMillis());
                     }
-                    current = new RawFrame(FrameControl.fromFcTl(data, ihdr));
+
+                    current = new RawFrame(FrameControl.fromFcTl(chunk.data, ihdr));
                 }
                 case "IDAT" -> {
                     if (ihdr == null) {
                         return null;
                     }
+
                     if (current == null) {
                         current = new RawFrame(FrameControl.defaultFrame(ihdr));
                     }
-                    current.idatParts.add(data);
+                    current.markHasData();
                 }
                 case "fdAT" -> {
-                    if (current != null && data.length > 4) {
-                        current.idatParts.add(Arrays.copyOfRange(data, 4, data.length));
+                    if (current == null || chunk.data.length <= 4) {
+                        continue;
                     }
+                    current.markHasData();
                 }
                 case "IEND" -> {
                     if (current != null && current.hasData()) {
-                        frames.add(current);
+                        frameCount++;
+                        totalDurationMs += Math.max(1, current.control.delayMillis());
                     }
                     current = null;
                 }
                 default -> {
-                    if (!"IDAT".equals(type) && !"IEND".equals(type)) {
-                        sharedChunks.add(new Chunk(type, data));
+                    if (!"IHDR".equals(chunk.type) && !"IDAT".equals(chunk.type) && !"fdAT".equals(chunk.type) && !"acTL".equals(chunk.type)
+                            && !"fcTL".equals(chunk.type) && !"IEND".equals(chunk.type)) {
+                        sharedChunks.add(new SharedChunk(chunk.type, chunk.data));
                     }
                 }
             }
 
-            if ("IEND".equals(type)) {
+            if ("IEND".equals(chunk.type)) {
                 break;
             }
         }
 
-        if (!hasAnimationControl || ihdr == null || frames.isEmpty()) {
+        if (!hasAnimationControl || ihdr == null || frameCount == 0) {
             return null;
         }
 
-        return compose(ihdr, sharedChunks, frames);
+        return new DiscoveredApng(
+                readInt(ihdr, 0),
+                readInt(ihdr, 4),
+                frameCount,
+                Math.max(1L, totalDurationMs),
+                Arrays.copyOf(ihdr, ihdr.length),
+                List.copyOf(sharedChunks)
+        );
     }
 
-    private static ParsedApng compose(byte[] ihdr, List<Chunk> sharedChunks, List<RawFrame> rawFrames) throws IOException {
-        int canvasWidth = readInt(ihdr, 0);
-        int canvasHeight = readInt(ihdr, 4);
+    public static ApngFrameStream openFrameStream(DiscoveredApng discovered, StreamOpener opener) {
+        return new ApngFrameStream(discovered, opener);
+    }
 
-        BufferedImage canvas = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB);
-        List<RenderedFrame> output = new ArrayList<>(rawFrames.size());
-
-        FrameControl previousControl = null;
-        BufferedImage previousSnapshot = null;
-
-        for (RawFrame rawFrame : rawFrames) {
-            if (previousControl != null) {
-                applyDispose(canvas, previousControl, previousSnapshot);
-            }
-
-            previousSnapshot = rawFrame.control.disposeOp == 2 ? copy(canvas) : null;
-
-            BufferedImage frame = decodeFrame(rawFrame.control, rawFrame.idatParts, ihdr, sharedChunks);
-            blend(canvas, frame, rawFrame.control);
-            output.add(new RenderedFrame(copy(canvas), rawFrame.control.delayMillis()));
-
-            previousControl = rawFrame.control;
+    private static Chunk readChunk(DataInputStream in) throws IOException {
+        int length;
+        try {
+            length = in.readInt();
+        } catch (EOFException ignored) {
+            return null;
         }
 
-        return new ParsedApng(canvasWidth, canvasHeight, output);
+        byte[] typeBytes = in.readNBytes(4);
+        if (typeBytes.length < 4) {
+            return null;
+        }
+
+        byte[] data = in.readNBytes(length);
+        if (data.length < length) {
+            return null;
+        }
+
+        in.readInt();
+        return new Chunk(new String(typeBytes, StandardCharsets.US_ASCII), data);
     }
 
-    private static BufferedImage decodeFrame(FrameControl control, List<byte[]> idatParts, byte[] ihdr, List<Chunk> sharedChunks) throws IOException {
+    private static BufferedImage decodeFrame(FrameControl control, List<byte[]> idatParts, byte[] ihdr, List<SharedChunk> sharedChunks) throws IOException {
         byte[] framePng = createFramePng(control, idatParts, ihdr, sharedChunks);
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(framePng));
         if (image == null) {
@@ -143,7 +148,7 @@ public final class ApngParser {
         return image;
     }
 
-    private static byte[] createFramePng(FrameControl control, List<byte[]> idatParts, byte[] ihdr, List<Chunk> sharedChunks) throws IOException {
+    private static byte[] createFramePng(FrameControl control, List<byte[]> idatParts, byte[] ihdr, List<SharedChunk> sharedChunks) throws IOException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(bytes);
 
@@ -156,10 +161,7 @@ public final class ApngParser {
         out.write(patched);
         writeCrc(out, "IHDR", patched);
 
-        for (Chunk chunk : sharedChunks) {
-            if ("acTL".equals(chunk.type) || "fcTL".equals(chunk.type) || "fdAT".equals(chunk.type)) {
-                continue;
-            }
+        for (SharedChunk chunk : sharedChunks) {
             writeChunk(out, chunk.type, chunk.data);
         }
 
@@ -233,6 +235,16 @@ public final class ApngParser {
         return copy;
     }
 
+    private static void clear(BufferedImage image) {
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setComposite(AlphaComposite.Clear);
+            g.fillRect(0, 0, image.getWidth(), image.getHeight());
+        } finally {
+            g.dispose();
+        }
+    }
+
     private static int readInt(byte[] data, int offset) {
         return ByteBuffer.wrap(data, offset, 4).order(ByteOrder.BIG_ENDIAN).getInt();
     }
@@ -241,25 +253,224 @@ public final class ApngParser {
         ByteBuffer.wrap(data, offset, 4).order(ByteOrder.BIG_ENDIAN).putInt(value);
     }
 
-    public record ParsedApng(int width, int height, List<RenderedFrame> frames) {
+    public interface StreamOpener {
+        InputStream open() throws IOException;
+    }
+
+    public static final class ApngFrameStream implements Closeable {
+        private final DiscoveredApng discovered;
+        private final StreamOpener opener;
+        private final BufferedImage canvas;
+
+        private DataInputStream input;
+        private FrameControl queuedControl;
+        private FrameControl previousControl;
+        private BufferedImage previousSnapshot;
+        private boolean restartPending;
+        private boolean closed;
+
+        private ApngFrameStream(DiscoveredApng discovered, StreamOpener opener) {
+            this.discovered = discovered;
+            this.opener = opener;
+            this.canvas = new BufferedImage(discovered.width(), discovered.height(), BufferedImage.TYPE_INT_ARGB);
+        }
+
+        public RenderedFrame nextFrame() throws IOException {
+            ensureLoop();
+
+            if (previousControl != null) {
+                applyDispose(canvas, previousControl, previousSnapshot);
+            }
+
+            FrameData frameData = readNextFrameData();
+            previousSnapshot = frameData.control.disposeOp == 2 ? copy(canvas) : null;
+
+            BufferedImage frame = decodeFrame(frameData.control, frameData.idatParts, discovered.ihdr(), discovered.sharedChunks());
+            blend(canvas, frame, frameData.control);
+            previousControl = frameData.control;
+
+            return new RenderedFrame(canvas, frameData.control.delayMillis());
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            closeInput();
+            previousControl = null;
+            previousSnapshot = null;
+            queuedControl = null;
+            restartPending = false;
+        }
+
+        private void ensureLoop() throws IOException {
+            if (closed) {
+                throw new IOException("APNG frame stream is closed");
+            }
+
+            if (input == null || restartPending) {
+                restartLoop();
+            }
+        }
+
+        private void restartLoop() throws IOException {
+            closeInput();
+            InputStream stream = opener.open();
+            if (stream == null) {
+                throw new IOException("APNG resource stream is unavailable");
+            }
+
+            input = new DataInputStream(stream);
+            byte[] signature = input.readNBytes(8);
+            if (!Arrays.equals(signature, PNG_SIGNATURE)) {
+                throw new IOException("Resource is not a PNG stream");
+            }
+
+            clear(canvas);
+            previousControl = null;
+            previousSnapshot = null;
+            queuedControl = null;
+            restartPending = false;
+        }
+
+        private FrameData readNextFrameData() throws IOException {
+            FrameControl control = queuedControl;
+            queuedControl = null;
+            List<byte[]> idatParts = new ArrayList<>();
+
+            while (!closed) {
+                Chunk chunk = readChunk(input);
+                if (chunk == null) {
+                    throw new IOException("Unexpected end of APNG stream");
+                }
+
+                switch (chunk.type) {
+                    case "fcTL" -> {
+                        FrameControl nextControl = FrameControl.fromFcTl(chunk.data, discovered.ihdr());
+                        if (!idatParts.isEmpty()) {
+                            queuedControl = nextControl;
+                            return new FrameData(resolveControl(control), List.copyOf(idatParts));
+                        }
+                        control = nextControl;
+                    }
+                    case "IDAT" -> {
+                        idatParts.add(chunk.data);
+                        if (control == null) {
+                            control = FrameControl.defaultFrame(discovered.ihdr());
+                        }
+                    }
+                    case "fdAT" -> {
+                        if (chunk.data.length <= 4) {
+                            continue;
+                        }
+                        if (control == null) {
+                            throw new IOException("Encountered fdAT before frame control");
+                        }
+                        idatParts.add(Arrays.copyOfRange(chunk.data, 4, chunk.data.length));
+                    }
+                    case "IEND" -> {
+                        if (!idatParts.isEmpty()) {
+                            restartPending = true;
+                            return new FrameData(resolveControl(control), List.copyOf(idatParts));
+                        }
+
+                        restartLoop();
+                        control = null;
+                    }
+                    default -> {
+                    }
+                }
+            }
+
+            throw new IOException("APNG frame stream closed");
+        }
+
+        private FrameControl resolveControl(FrameControl control) {
+            return control != null ? control : FrameControl.defaultFrame(discovered.ihdr());
+        }
+
+        private void closeInput() throws IOException {
+            if (input != null) {
+                input.close();
+                input = null;
+            }
+        }
+    }
+
+    public static final class DiscoveredApng {
+        private final int width;
+        private final int height;
+        private final int frameCount;
+        private final long totalDurationMs;
+        private final byte[] ihdr;
+        private final List<SharedChunk> sharedChunks;
+
+        private DiscoveredApng(int width, int height, int frameCount, long totalDurationMs, byte[] ihdr, List<SharedChunk> sharedChunks) {
+            this.width = width;
+            this.height = height;
+            this.frameCount = frameCount;
+            this.totalDurationMs = totalDurationMs;
+            this.ihdr = ihdr;
+            this.sharedChunks = sharedChunks;
+        }
+
+        public int width() {
+            return width;
+        }
+
+        public int height() {
+            return height;
+        }
+
+        public int frameCount() {
+            return frameCount;
+        }
+
+        public long totalDurationMs() {
+            return totalDurationMs;
+        }
+
+        byte[] ihdr() {
+            return ihdr;
+        }
+
+        List<SharedChunk> sharedChunks() {
+            return sharedChunks;
+        }
     }
 
     public record RenderedFrame(BufferedImage image, int delayMillis) {
     }
 
+    static final class SharedChunk {
+        private final String type;
+        private final byte[] data;
+
+        private SharedChunk(String type, byte[] data) {
+            this.type = type;
+            this.data = Arrays.copyOf(data, data.length);
+        }
+    }
+
     private record Chunk(String type, byte[] data) {
+    }
+
+    private record FrameData(FrameControl control, List<byte[]> idatParts) {
     }
 
     private static final class RawFrame {
         private final FrameControl control;
-        private final List<byte[]> idatParts = new ArrayList<>();
+        private boolean hasData;
 
         private RawFrame(FrameControl control) {
             this.control = control;
         }
 
+        private void markHasData() {
+            hasData = true;
+        }
+
         private boolean hasData() {
-            return !idatParts.isEmpty();
+            return hasData;
         }
     }
 
