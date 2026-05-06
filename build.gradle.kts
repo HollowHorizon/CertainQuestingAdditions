@@ -1,12 +1,16 @@
-import org.gradle.api.tasks.bundling.Zip
-import org.gradle.kotlin.dsl.compileOnly
-import org.gradle.kotlin.dsl.invoke
+import gg.meza.stonecraft.mod
+import java.util.*
 
 plugins {
     id("gg.meza.stonecraft")
 }
 
-// Configure MixinConfigs in MANIFEST for Forge/NeoForge
+val properties = Properties()
+val userPropertiesFile = project.rootProject.file("user.properties")
+if (userPropertiesFile.exists()) {
+    properties.load(userPropertiesFile.inputStream())
+}
+
 afterEvaluate {
     tasks.withType<Jar> {
         manifest {
@@ -33,7 +37,7 @@ dependencies {
 
     when (version) {
         "1.20.1" -> {
-            if(platform == "fabric") {
+            if (platform == "fabric") {
                 modImplementation("lib:ftb-library-fabric:2001.2.10")
                 modImplementation("lib:ftb-quests-fabric:2001.4.14")
                 modImplementation("lib:ftb-teams-fabric:2001.3.1")
@@ -48,8 +52,9 @@ dependencies {
                 include("io.github.llamalad7:mixinextras-forge:0.5.0")
             }
         }
+
         "1.21.1" -> {
-            if(platform == "fabric") {
+            if (platform == "fabric") {
                 modImplementation("lib:ftb-library-fabric:2101.1.20")
                 modImplementation("lib:ftb-quests-fabric:2101.1.15")
                 modImplementation("lib:ftb-teams-fabric:2101.1.4")
@@ -111,4 +116,37 @@ tasks.register("createMultiVersionResourcePacks") {
     description = "Создает мультиверсионные ресурспаки (1.20.1 - 1.21.1) для каждого шейдера."
 
     dependsOn(zipTaskNames)
+}
+
+publishMods {
+    dryRun = false
+
+    modrinth {
+        projectId = "5BPpCYUe"
+        accessToken = properties.getProperty("modrinthToken")
+        minecraftVersions.set(listOf(mod.minecraftVersion))
+        version.set(mod.version)
+        modLoaders.set(listOf(mod.loader))
+
+        requires("architectury-api")
+    }
+
+    curseforge {
+        projectId = "1372051"
+        accessToken = properties.getProperty("curseforgeToken")
+
+        minecraftVersions.set(listOf(mod.minecraftVersion))
+        version.set(mod.version)
+        modLoaders.set(listOf(mod.loader))
+
+        clientRequired = true
+        serverRequired = false
+
+        requires("architectury-api")
+        if (mod.isFabric) {
+            requires("ftb-quests-fabric")
+        } else {
+            requires("ftb-quests-forge")
+        }
+    }
 }

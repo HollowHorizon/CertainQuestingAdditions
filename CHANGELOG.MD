@@ -1,0 +1,1 @@
+- Fix quest button hovering when selected.
