@@ -2,10 +2,13 @@ package ru.hollowhorizon.additions.questing.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
+import dev.ftb.mods.ftblibrary.ui.ContextMenu;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -30,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
+import ru.hollowhorizon.additions.questing.client.EntityAttachmentActions;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
 import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
@@ -42,6 +46,8 @@ import java.util.List;
 public abstract class QuestPanelMixin extends Panel {
     @Shadow @Final private QuestScreen questScreen;
     @Shadow @Final private static ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE;
+    @Shadow protected double questX;
+    @Shadow protected double questY;
 
     //? if >= 1.21.1 {
     @Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
@@ -60,6 +66,12 @@ public abstract class QuestPanelMixin extends Panel {
         } finally {
             ApngTextureManager.popScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
         }
+    }
+
+    @WrapOperation(method = "mousePressed", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;openContextMenu(Ljava/util/List;)Ldev/ftb/mods/ftblibrary/ui/ContextMenu;"))
+    private ContextMenu cqa$addEntityCanvasContextItem(QuestScreen screen, List<ContextMenuItem> items, Operation<ContextMenu> original) {
+        EntityAttachmentActions.addCanvasContextMenuEntry(screen, items, questX, questY);
+        return original.call(screen, items);
     }
 
     @Inject(method = "drawOffsetBackground", at = @At("HEAD"), cancellable = true)
@@ -92,7 +104,7 @@ public abstract class QuestPanelMixin extends Panel {
 
             RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            float mu = (float)(mt * (Double)ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(selectedChapter) % (double)1.0F);
+            float mu = (float)(mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(selectedChapter) % (double)1.0F);
 
             for(Widget widget : this.widgets) {
                 if (widget.shouldDraw() && widget instanceof QuestButton) {
@@ -116,12 +128,11 @@ public abstract class QuestPanelMixin extends Panel {
                 }
             }
 
-            float ms = (float)(mt * (Double)ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(selectedChapter) % (double)1.0F);
-            List<QuestButton> toOutline = new ArrayList();
+            float ms = (float)(mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(selectedChapter) % (double)1.0F);
+            List<QuestButton> toOutline = new ArrayList<>();
 
             for(Widget widget : this.widgets) {
-                if (widget.shouldDraw() && widget instanceof QuestButton) {
-                    QuestButton qb = (QuestButton) widget;
+                if (widget.shouldDraw() && widget instanceof QuestButton qb) {
                     var quest = ((QuestButtonAccessor) qb).getQuest();
                     if (!quest.shouldHideDependencyLines() || qb.isMouseOver()) {
                         for(QuestButton button : qb.getDependencies()) {

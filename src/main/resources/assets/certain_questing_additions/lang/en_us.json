@@ -11,5 +11,20 @@
   "certain_questing_additions.appearance.smooth_animations": "Smooth animations with easing functions",
   "certain_questing_additions.appearance.shader_background": "Shader background for quest screen",
   "certain_questing_additions.appearance.button_hover_glow_alpha": "Button hover glow opacity (0-255)",
-  "certain_questing_additions.appearance.quest_hover_glow_alpha": "Quest hover glow opacity (0-255)"
+  "certain_questing_additions.appearance.quest_hover_glow_alpha": "Quest hover glow opacity (0-255)",
+
+  "certain_questing_additions.entity_attachment.canvas": "Entity",
+  "certain_questing_additions.entity_attachment.config_group": "Entity",
+  "certain_questing_additions.entity_attachment.description": "Entity",
+  "certain_questing_additions.entity_attachment.entity": "Entity",
+  "certain_questing_additions.entity_attachment.tint": "Entity tint",
+  "certain_questing_additions.entity_attachment.order": "Entity draw order",
+  "certain_questing_additions.entity_attachment.alpha": "Entity opacity",
+  "certain_questing_additions.entity_attachment.entity_id": "Entity ID / spec",
+  "certain_questing_additions.entity_attachment.player_skin": "Player skin",
+  "certain_questing_additions.entity_attachment.player_name": "Player name",
+  "certain_questing_additions.entity_attachment.player_name_visible": "Show player name",
+  "certain_questing_additions.entity_attachment.auto_rotate": "Auto rotate",
+  "certain_questing_additions.entity_attachment.look_at_cursor": "Look at cursor",
+  "certain_questing_additions.entity_attachment.invalid": "Unknown entity: %s"
 }

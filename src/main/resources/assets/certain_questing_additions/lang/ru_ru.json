@@ -11,5 +11,20 @@
   "certain_questing_additions.appearance.smooth_animations": "Плавные анимации с easing-функциями",
   "certain_questing_additions.appearance.shader_background": "Шейдер для фона экрана квестов",
   "certain_questing_additions.appearance.button_hover_glow_alpha": "Прозрачность подсветки кнопки при наведении (0-255)",
-  "certain_questing_additions.appearance.quest_hover_glow_alpha": "Прозрачность подсветки квеста при наведении (0-255)"
+  "certain_questing_additions.appearance.quest_hover_glow_alpha": "Прозрачность подсветки квеста при наведении (0-255)",
+
+  "certain_questing_additions.entity_attachment.canvas": "Сущность",
+  "certain_questing_additions.entity_attachment.config_group": "Сущность",
+  "certain_questing_additions.entity_attachment.description": "Сущность",
+  "certain_questing_additions.entity_attachment.entity": "Сущность",
+  "certain_questing_additions.entity_attachment.tint": "Цвет сущности",
+  "certain_questing_additions.entity_attachment.order": "Порядок отрисовки сущности",
+  "certain_questing_additions.entity_attachment.alpha": "Прозрачность сущности",
+  "certain_questing_additions.entity_attachment.entity_id": "ID/параметры сущности",
+  "certain_questing_additions.entity_attachment.player_skin": "Скин игрока",
+  "certain_questing_additions.entity_attachment.player_name": "Имя игрока",
+  "certain_questing_additions.entity_attachment.player_name_visible": "Показывать имя игрока",
+  "certain_questing_additions.entity_attachment.auto_rotate": "Автовращение",
+  "certain_questing_additions.entity_attachment.look_at_cursor": "Смотреть на курсор",
+  "certain_questing_additions.entity_attachment.invalid": "Неизвестная сущность: %s"
 }
