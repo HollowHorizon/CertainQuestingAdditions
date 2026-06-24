@@ -7,7 +7,9 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -19,7 +21,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import ru.hollowhorizon.additions.questing.mixins.EntityRenderDispatcherAccessor;
@@ -32,7 +33,7 @@ import java.util.Optional;
 public final class EntityIcon extends Icon {
     public static final String PREFIX = "entity:";
 
-    private static final int FULL_BRIGHT_LIGHT = 0xF000F0;
+    private static final int FULL_BRIGHT_LIGHT = LightmapTextureManager.pack(15, 15);
     private static final float MODEL_PADDING = 0.75F;
     private static final float MIN_ENTITY_SIZE = 0.1F;
     private static final long ROTATION_PERIOD_MS = 8000L;
@@ -41,8 +42,7 @@ public final class EntityIcon extends Icon {
     private static final float CURSOR_MAX_PITCH = 35F;
     private static final int PLAYER_NAME_GAP = 2;
     private static final int PLAYER_NAME_COLOR = 0xFFFFFF;
-    private static final Vector3f ENTITY_LIGHT_0 = new Vector3f(0.2F, -1F, 1F).normalize();
-    private static final Vector3f ENTITY_LIGHT_1 = new Vector3f(-0.2F, -1F, 0F).normalize();
+    private static final Vector3f ENTITY_ICON_LIGHT = new Vector3f(0F, -1F, 0F);
 
     private final EntityIconSpec spec;
     private final Color4I color;
@@ -197,12 +197,17 @@ public final class EntityIcon extends Icon {
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(pose.modelYaw()));
             }
 
-            setupEntityLighting(pose);
+            setupEntityLighting();
             dispatcher.setRenderShadows(false);
             RenderSystem.setShaderColor(color.redf(), color.greenf(), color.bluef(), color.alphaf());
+            VertexConsumerProvider vertexConsumers = FlatEntityLightingVertexConsumerProvider.wrap(
+                    graphics.getVertexConsumers(),
+                    ENTITY_ICON_LIGHT,
+                    FULL_BRIGHT_LIGHT
+            );
             EntityIconRenderContext.renderingEntityIcon(() ->
                     RenderSystem.runAsFancy(() ->
-                            dispatcher.render(entity, 0D, 0D, 0D, pose.yaw(), 1F, matrices, graphics.getVertexConsumers(), FULL_BRIGHT_LIGHT)
+                            dispatcher.render(entity, 0D, 0D, 0D, pose.yaw(), 1F, matrices, vertexConsumers, FULL_BRIGHT_LIGHT)
                     )
             );
             graphics.draw();
@@ -375,22 +380,8 @@ public final class EntityIcon extends Icon {
         }
     }
 
-    private static void setupEntityLighting(EntityPose pose) {
-        DiffuseLighting.method_34742();
-        if (pose.pitch() == 0F) {
-            RenderSystem.setShaderLights(ENTITY_LIGHT_0, ENTITY_LIGHT_1);
-            return;
-        }
-
-        Quaternionf pitchRotation = RotationAxis.POSITIVE_X.rotationDegrees(pose.pitch());
-        RenderSystem.setShaderLights(
-                transformLight(ENTITY_LIGHT_0, pitchRotation),
-                transformLight(ENTITY_LIGHT_1, pitchRotation)
-        );
-    }
-
-    private static Vector3f transformLight(Vector3f light, Quaternionf rotation) {
-        return rotation.transform(light, new Vector3f());
+    private static void setupEntityLighting() {
+        RenderSystem.setShaderLights(ENTITY_ICON_LIGHT, ENTITY_ICON_LIGHT);
     }
 
     private static float renderScale(Entity entity, int width, int height) {
