@@ -91,6 +91,7 @@ public final class EntityIconSpec {
     public boolean usesCurrentClientPlayerSkin() {
         return isPlayer()
                 && skinName.isBlank()
+                && playerName.isBlank()
                 && playerUuid == null
                 && nbt.isBlank()
                 && nbtValues.isEmpty();
@@ -103,6 +104,10 @@ public final class EntityIconSpec {
     public String skinName(String fallback) {
         if (!skinName.isBlank()) {
             return skinName;
+        }
+
+        if (!playerName.isBlank()) {
+            return playerName;
         }
 
         return fallback == null || fallback.isBlank() ? DEFAULT_PLAYER_NAME : fallback;
@@ -163,7 +168,11 @@ public final class EntityIconSpec {
         }
 
         try {
-            return Optional.of(StringNbtReader.parse("{" + body + "}"));
+            //? if >= 1.21.11 {
+            return Optional.of(StringNbtReader.readCompound("{" + body + "}"));
+            //?} else {
+            /*return Optional.of(StringNbtReader.parse("{" + body + "}"));
+            *///?}
         } catch (CommandSyntaxException ignored) {
             return Optional.empty();
         }

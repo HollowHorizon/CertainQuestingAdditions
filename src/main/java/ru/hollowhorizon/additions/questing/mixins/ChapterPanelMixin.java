@@ -1,6 +1,10 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
-import dev.ftb.mods.ftblibrary.ui.Panel;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Panel;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.quests.ChapterPanel;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.MathHelper;

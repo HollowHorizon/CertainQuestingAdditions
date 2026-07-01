@@ -1,12 +1,30 @@
 package ru.hollowhorizon.additions.questing.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
+//? if < 1.21.11 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Button;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Panel;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Widget;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -127,19 +145,31 @@ public final class ApngTextureManager {
         }
     }
 
-    public static boolean bindIfAnimated(Identifier textureId) {
-        if (!isAPngPath(textureId) || UNSUPPORTED.contains(textureId)) {
+    //? if < 1.21.11 {
+    /*public static boolean bindIfAnimated(Identifier textureId) {
+        Identifier resolvedTexture = resolveAnimatedTexture(textureId);
+        if (textureId.equals(resolvedTexture)) {
             return false;
+        }
+
+        RenderSystem.setShaderTexture(0, resolvedTexture);
+        return true;
+    }
+    *///?}
+
+    public static Identifier resolveAnimatedTexture(Identifier textureId) {
+        if (!isAPngPath(textureId) || UNSUPPORTED.contains(textureId)) {
+            return textureId;
         }
 
         ApngScope scope = currentScope();
         if (scope == null) {
-            return false;
+            return textureId;
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client == null || activeScreen == null) {
-            return false;
+            return textureId;
         }
 
         ApngStreamEntry entry = ENTRIES.computeIfAbsent(textureId, ApngStreamEntry::new);
@@ -157,27 +187,28 @@ public final class ApngTextureManager {
         }
 
         rebalanceSessions();
-        return bindEntry(client, entry);
+        Identifier resolvedTexture = resolveEntryTexture(client, entry);
+        return resolvedTexture == null ? textureId : resolvedTexture;
     }
 
     public static void clearCache() {
         clearCacheInternal();
     }
 
-    private static boolean bindEntry(MinecraftClient client, ApngStreamEntry entry) {
+    private static Identifier resolveEntryTexture(MinecraftClient client, ApngStreamEntry entry) {
         PlaybackSession session;
         synchronized (entry) {
             session = entry.session;
         }
 
         if (session == null) {
-            return false;
+            return null;
         }
 
         try {
             synchronized (entry) {
                 if (entry.session != session || session.closed) {
-                    return false;
+                    return null;
                 }
 
                 promoteReadyFrames(client, entry, session);
@@ -185,17 +216,16 @@ public final class ApngTextureManager {
 
                 if (session.texture == null) {
                     entry.state = entry.discovered != null ? EntryState.READY_STATIC : EntryState.DISCOVERED;
-                    return false;
+                    return null;
                 }
 
-                RenderSystem.setShaderTexture(0, session.textureId);
                 entry.state = EntryState.STREAMING;
-                return true;
+                return session.textureId;
             }
         } catch (Throwable t) {
             CertainQuestingAdditions.LOGGER.warn("Failed to bind streamed APNG {}", entry.textureId, t);
             failEntry(entry, t);
-            return false;
+            return null;
         }
     }
 
@@ -207,7 +237,11 @@ public final class ApngTextureManager {
 
         if (session.texture == null) {
             session.pendingFrame = null;
-            session.texture = new NativeImageBackedTexture(readyFrame.image());
+            //? if >= 1.21.11 {
+            session.texture = new NativeImageBackedTexture(() -> session.textureId.toString(), readyFrame.image());
+            //?} else {
+            /*session.texture = new NativeImageBackedTexture(readyFrame.image());
+            *///?}
             client.getTextureManager().registerTexture(session.textureId, session.texture);
             session.texture.upload();
             session.nextFrameAtMs = System.currentTimeMillis() + readyFrame.delayMillis();
@@ -564,7 +598,7 @@ public final class ApngTextureManager {
             return;
         }
 
-        Identifier textureId = imageIcon.getResourceLocation();
+        Identifier textureId = ImageIconAccess.resourceId(imageIcon);
         if (!isAPngPath(textureId)) {
             return;
         }
@@ -574,7 +608,7 @@ public final class ApngTextureManager {
 
     private static void collectIcon(Icon icon, Set<Identifier> textures) {
         if (icon instanceof ImageIcon imageIcon) {
-            Identifier textureId = imageIcon.getResourceLocation();
+            Identifier textureId = ImageIconAccess.resourceId(imageIcon);
             if (isAPngPath(textureId)) {
                 textures.add(textureId);
             }

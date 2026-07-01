@@ -19,10 +19,22 @@
     "ChapterPanelGroupButtonMixin",
     "ChapterPanelMixin",
     "ChapterPanelModpackButtonMixin",
-    "EntityRenderDispatcherAccessor",
+    //? if < 1.21.11 {
+    /*"EntityRenderDispatcherAccessor",
     "EntityRendererMixin",
+    *///?} else {
+    "EntityGuiElementRendererMixin",
+    "EntityRendererShadowMixin",
+    "EntityRenderStateMixin",
+    "ModelCommandRendererMixin",
+    "ModelPartCommandRendererMixin",
+    //?}
     "IconMixin",
-    "ImageIconMixin",
+    //? if >= 1.21.11 {
+    "ImageIconRendererMixin",
+    //?} else {
+    /*"ImageIconMixin",
+    *///?}
     "PlayerEntityMixin",
     "QuestButtonAccessor",
     "QuestButtonMixin",

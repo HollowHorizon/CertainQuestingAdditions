@@ -1,18 +1,26 @@
 package ru.hollowhorizon.additions.questing.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftbquests.quest.Chapter;
+//? if < 1.21.11 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import org.joml.Matrix4f;
 import ru.hollowhorizon.additions.questing.registry.ModShaders;
-
+*///?}
+import net.minecraft.client.gui.DrawContext;
 
 public class CustomBackgroundRenderer {
     public static void draw(DrawContext graphics, Chapter selectedChapter, int x, int y, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
-        var shaderId = ChapterShaderConfig.resolveShaderId(selectedChapter);
+        //? if >= 1.21.11 {
+        return;
+        //?} else if >= 1.21.1 {
+        /*var shaderId = ChapterShaderConfig.resolveShaderId(selectedChapter);
         var shader = ModShaders.get(shaderId);
         if (shader == null) {
             return;
@@ -21,33 +29,41 @@ public class CustomBackgroundRenderer {
         RenderSystem.setShader(() -> shader);
         setupUniforms(shader, w, h, centerX, centerY, scrollWidth, scrollHeight, zoom);
         Matrix4f matrix = graphics.getMatrices().peek().getPositionMatrix();
-        //? if >= 1.21.1 {
         BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        buffer.vertex(matrix, x, y, 0f).texture(0f, 0f);
-        buffer.vertex(matrix, x, y + h, 0f).texture(0f, 1f);
-        buffer.vertex(matrix, x + w, y + h, 0f).texture(1f, 1f);
-        buffer.vertex(matrix, x + w, y, 0f).texture(1f, 0f);
+        buffer.vertex(matrix, x, y, 0F).texture(0F, 0F);
+        buffer.vertex(matrix, x, y + h, 0F).texture(0F, 1F);
+        buffer.vertex(matrix, x + w, y + h, 0F).texture(1F, 1F);
+        buffer.vertex(matrix, x + w, y, 0F).texture(1F, 0F);
         BufferRenderer.drawWithGlobalProgram(buffer.end());
-        //?} else {
-        
-        /*BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        *///?} else {
+        /*var shaderId = ChapterShaderConfig.resolveShaderId(selectedChapter);
+        var shader = ModShaders.get(shaderId);
+        if (shader == null) {
+            return;
+        }
+
+        RenderSystem.setShader(() -> shader);
+        setupUniforms(shader, w, h, centerX, centerY, scrollWidth, scrollHeight, zoom);
+        Matrix4f matrix = graphics.getMatrices().peek().getPositionMatrix();
+        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        buffer.vertex(matrix, x,     y,     0f).texture(0f, 0f).next();
-        buffer.vertex(matrix, x,     y + h, 0f).texture(0f, 1f).next();
-        buffer.vertex(matrix, x + w, y + h, 0f).texture(1f, 1f).next();
-        buffer.vertex(matrix, x + w, y,     0f).texture(1f, 0f).next();
+        buffer.vertex(matrix, x, y, 0F).texture(0F, 0F).next();
+        buffer.vertex(matrix, x, y + h, 0F).texture(0F, 1F).next();
+        buffer.vertex(matrix, x + w, y + h, 0F).texture(1F, 1F).next();
+        buffer.vertex(matrix, x + w, y, 0F).texture(1F, 0F).next();
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         *///?}
     }
 
-    private static void setupUniforms(ShaderProgram shader, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
+    //? if < 1.21.11 {
+    /*private static void setupUniforms(ShaderProgram shader, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
         var mc = MinecraftClient.getInstance();
 
         //? if >= 1.21.1 {
-        float time = mc.world == null ? 0f : (mc.world.getTime() % 100000 + mc.getRenderTickCounter().getTickDelta(true)) / 20f;
+        float time = mc.world == null ? 0F : (mc.world.getTime() % 100000 + mc.getRenderTickCounter().getTickDelta(true)) / 20F;
         //?} else {
-        /*float time = mc.world == null ? 0f : (mc.world.getTime() % 100000 + mc.getTickDelta()) / 20f;
-        *///?}
+        /^float time = mc.world == null ? 0F : (mc.world.getTime() % 100000 + mc.getTickDelta()) / 20F;
+        ^///?}
 
         shader.getUniformOrDefault("size").set((float) w, (float) h);
         shader.getUniformOrDefault("scrollOffset").set((float) centerX, (float) centerY);
@@ -55,4 +71,5 @@ public class CustomBackgroundRenderer {
         shader.getUniformOrDefault("time").set(time);
         shader.getUniformOrDefault("zoom").set(zoom);
     }
+    *///?}
 }

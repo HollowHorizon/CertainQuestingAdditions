@@ -26,16 +26,41 @@ final class FlatEntityLightingVertexConsumerProvider implements VertexConsumerPr
         return new FlatEntityLightingVertexConsumerProvider(delegate, normal, packedLight);
     }
 
-    @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
-        return new FlatEntityLightingVertexConsumer(delegate.getBuffer(layer));
+    static VertexConsumer wrap(VertexConsumer delegate, Vector3f normal, int packedLight) {
+        return new FlatEntityLightingVertexConsumer(delegate, normal, packedLight);
     }
 
-    private final class FlatEntityLightingVertexConsumer implements VertexConsumer {
-        private final VertexConsumer delegate;
+    @Override
+    public VertexConsumer getBuffer(RenderLayer layer) {
+        return new FlatEntityLightingVertexConsumer(delegate.getBuffer(layer), normalX, normalY, normalZ, lightU, lightV);
+    }
 
-        private FlatEntityLightingVertexConsumer(VertexConsumer delegate) {
+    private static final class FlatEntityLightingVertexConsumer implements VertexConsumer {
+        private final VertexConsumer delegate;
+        private final float normalX;
+        private final float normalY;
+        private final float normalZ;
+        private final int lightU;
+        private final int lightV;
+
+        private FlatEntityLightingVertexConsumer(VertexConsumer delegate, Vector3f normal, int packedLight) {
+            this(delegate, normal.x, normal.y, normal.z, packedLight & 0xFFFF, packedLight >> 16 & 0xFFFF);
+        }
+
+        private FlatEntityLightingVertexConsumer(
+                VertexConsumer delegate,
+                float normalX,
+                float normalY,
+                float normalZ,
+                int lightU,
+                int lightV
+        ) {
             this.delegate = delegate;
+            this.normalX = normalX;
+            this.normalY = normalY;
+            this.normalZ = normalZ;
+            this.lightU = lightU;
+            this.lightV = lightV;
         }
 
         //? if >= 1.21.1 {
@@ -57,6 +82,14 @@ final class FlatEntityLightingVertexConsumerProvider implements VertexConsumerPr
             delegate.color(red, green, blue, alpha);
             return this;
         }
+
+        //? if >= 1.21.11 {
+        @Override
+        public VertexConsumer color(int argb) {
+            delegate.color(argb);
+            return this;
+        }
+        //?}
 
         @Override
         public VertexConsumer texture(float u, float v) {
@@ -81,6 +114,14 @@ final class FlatEntityLightingVertexConsumerProvider implements VertexConsumerPr
             delegate.normal(normalX, normalY, normalZ);
             return this;
         }
+
+        //? if >= 1.21.11 {
+        @Override
+        public VertexConsumer lineWidth(float width) {
+            delegate.lineWidth(width);
+            return this;
+        }
+        //?}
 
         //? if < 1.21.1 {
         /*@Override

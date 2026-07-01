@@ -4,7 +4,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 //? if >= 1.21.1 {
-import net.minecraft.client.util.SkinTextures;
+//? if >= 1.21.11 {
+import net.minecraft.entity.player.SkinTextures;
+//?} else {
+/*import net.minecraft.client.util.SkinTextures;
+*///?}
 //?} else {
 /*import net.minecraft.util.Identifier;
 *///?}
@@ -55,12 +59,21 @@ public final class PreviewPlayerEntity extends OtherClientPlayerEntity {
     }
 
     //? if >= 1.21.1 {
+    //? if >= 1.21.11 {
     @Override
+    public SkinTextures getSkin() {
+    //?} else {
+    /*@Override
     public SkinTextures getSkinTextures() {
+    *///?}
         if (spec.usesCurrentClientPlayerSkin()) {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client != null && client.player != null) {
-                return client.player.getSkinTextures();
+                //? if >= 1.21.11 {
+                return client.player.getSkin();
+                //?} else {
+                /*return client.player.getSkinTextures();
+                *///?}
             }
         }
 

@@ -1,48 +1,64 @@
 package ru.hollowhorizon.additions.questing.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+//? if < 1.21.11 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+*///?}
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.VertexConsumerProvider;
+//? if < 1.21.11 {
+/*import net.minecraft.client.render.DiffuseLighting;
+*///?}
+//? if >= 1.21.11 {
+import net.minecraft.client.render.entity.state.EntityRenderState;
+//?} else {
+/*import net.minecraft.client.render.entity.EntityRenderDispatcher;
+*///?}
+//? if < 1.21.11 {
+/*import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
+*///?}
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+//? if < 1.21.11 {
+/*import net.minecraft.util.math.RotationAxis;
+*///?}
 import net.minecraft.world.World;
-import org.joml.Matrix4f;
+//? if >= 1.21.11 {
+import org.joml.Quaternionf;
+//?}
 import org.joml.Vector3f;
-import org.joml.Vector4f;
-import ru.hollowhorizon.additions.questing.mixins.EntityRenderDispatcherAccessor;
-//? if forge {
-/*import net.minecraftforge.registries.ForgeRegistries;
+//? if < 1.21.11 {
+/*import ru.hollowhorizon.additions.questing.mixins.EntityRenderDispatcherAccessor;
 *///?}
 
 import java.util.Optional;
 
-public final class EntityIcon extends Icon {
+//? if >= 1.21.11 {
+public final class EntityIcon extends Icon<EntityIcon> {
+//?} else {
+/*public final class EntityIcon extends Icon {
+*///?}
     public static final String PREFIX = "entity:";
 
-    private static final int FULL_BRIGHT_LIGHT = LightmapTextureManager.pack(15, 15);
+    private static final int FULL_BRIGHT_LIGHT = EntityIconLighting.FULL_BRIGHT_LIGHT;
     private static final float MODEL_PADDING = 0.75F;
     private static final float MIN_ENTITY_SIZE = 0.1F;
     private static final long ROTATION_PERIOD_MS = 8000L;
     private static final float FRONT_FACING_YAW = 180F;
     private static final float CURSOR_MAX_YAW = 75F;
     private static final float CURSOR_MAX_PITCH = 35F;
-    private static final int PLAYER_NAME_GAP = 2;
-    private static final int PLAYER_NAME_COLOR = 0xFFFFFF;
-    private static final Vector3f ENTITY_ICON_LIGHT = new Vector3f(0F, -1F, 0F);
+    private static final float ENTITY_UI_OFFSET = 0.0625F;
+    //? if >= 1.21.11 {
+    private static final double GUI_ENTITY_TARGET_HORIZONTAL_PADDING = 0.5D;
+    private static final double GUI_ENTITY_TARGET_VERTICAL_PADDING = 0.15D;
+    //?}
+    private static final Vector3f ENTITY_ICON_LIGHT = EntityIconLighting.FLAT_LIGHT;
 
     private final EntityIconSpec spec;
     private final Color4I color;
@@ -78,7 +94,7 @@ public final class EntityIcon extends Icon {
 
     public static Optional<EntityIcon> fromRegisteredEntityId(String value) {
         return EntityIconSpec.parse(stripPrefix(value))
-                .filter(spec -> isRegistered(spec.entityId()) || spec.isPlayer())
+                .filter(spec -> EntityIconEntityFactory.isRegistered(spec.entityId()) || spec.isPlayer())
                 .filter(EntityIconSpec::hasValidNbt)
                 .map(EntityIcon::new);
     }
@@ -139,15 +155,26 @@ public final class EntityIcon extends Icon {
         return new EntityIcon(spec.withDisplayOptionsFrom(source.spec), color);
     }
 
+    //? if >= 1.21.11 {
     @Override
+    public EntityIconRenderer getRenderer() {
+        return EntityIconRenderer.INSTANCE;
+    }
+    //?} else {
+    /*@Override
     public void draw(DrawContext graphics, int x, int y, int w, int h) {
+        render(graphics, x, y, w, h);
+    }
+    *///?}
+
+    public void render(DrawContext graphics, int x, int y, int w, int h) {
         if (w <= 0 || h <= 0 || color.alphai() <= 0) {
             return;
         }
 
         Entity entity = getOrCreateEntity();
         if (entity == null) {
-            Icons.BARRIER.draw(graphics, x, y, w, h);
+            FtbIconRenderer.draw(Icons.BARRIER, graphics, x, y, w, h);
             return;
         }
 
@@ -155,19 +182,21 @@ public final class EntityIcon extends Icon {
     }
 
     @Override
-    public Icon copy() {
+    public EntityIcon copy() {
         return new EntityIcon(spec, color);
     }
 
     @Override
-    public Icon withColor(Color4I color) {
+    public EntityIcon withColor(Color4I color) {
         return new EntityIcon(spec, color);
     }
 
-    @Override
+    //? if < 1.21.11 {
+    /*@Override
     public double aspectRatio() {
         return 1D;
     }
+    *///?}
 
     @Override
     public String toString() {
@@ -180,14 +209,72 @@ public final class EntityIcon extends Icon {
             return;
         }
 
-        MatrixStack matrices = graphics.getMatrices();
+        //? if >= 1.21.11 {
+        ScreenRect renderRect = EntityIconRenderGeometry.transformedRect(graphics.getMatrices(), x, y, w, h);
+        if (!renderRect.isValid()) {
+            return;
+        }
+
+        EntityPose pose = getEntityPose(client, renderRect);
+        EntityStateSnapshot previousState = EntityStateSnapshot.capture(entity);
+        float previewTicks = EntityIconRenderGeometry.previewTicks();
+        float tickProgress = EntityIconRenderGeometry.tickProgress(previewTicks);
+
+        prepareEntity(entity, pose.yaw(), pose.pitch(), previewTicks);
+        try {
+            EntityRenderState state = EntityIconRenderContext.renderingEntityIcon(() ->
+                    EntityIconRenderStateFactory.create(
+                            client,
+                            entity,
+                            pose.yaw(),
+                            pose.pitch(),
+                            tickProgress,
+                            FULL_BRIGHT_LIGHT
+                    )
+            );
+            if (state == null) {
+                return;
+            }
+
+            float scale = renderScale(state, renderRect.pixelWidth(), renderRect.pixelHeight());
+            ScreenRect targetRect = renderRect.expand(
+                    GUI_ENTITY_TARGET_HORIZONTAL_PADDING,
+                    GUI_ENTITY_TARGET_VERTICAL_PADDING
+            );
+            Quaternionf modelRotation = new Quaternionf().rotateZ((float) Math.PI);
+            if (pose.modelYaw() != 0F) {
+                modelRotation.rotateY(pose.modelYaw() * MathHelper.RADIANS_PER_DEGREE);
+            }
+
+            Vector3f translation = new Vector3f(0F, state.height / 2F + ENTITY_UI_OFFSET, 0F);
+            graphics.addEntity(
+                    state,
+                    scale,
+                    translation,
+                    modelRotation,
+                    new Quaternionf(),
+                    targetRect.left(),
+                    targetRect.top(),
+                    targetRect.right(),
+                    targetRect.bottom()
+            );
+        } finally {
+            previousState.restore(entity);
+        }
+
+        float labelScale = renderScale(entity, w, h);
+        EntityIconPlayerNameRenderer.draw(graphics, client, spec, color, entity, x, y, w, h, labelScale);
+        //?} else {
+        /*MatrixStack matrices = graphics.getMatrices();
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         EntityPose pose = getEntityPose(client, matrices, x, y, w, h);
         EntityStateSnapshot previousState = EntityStateSnapshot.capture(entity);
         boolean previousRenderShadows = ((EntityRenderDispatcherAccessor) dispatcher).cqa$getRenderShadows();
         float scale = renderScale(entity, w, h);
+        float previewTicks = EntityIconRenderGeometry.previewTicks();
+        float tickProgress = EntityIconRenderGeometry.tickProgress(previewTicks);
 
-        prepareEntity(entity, pose.yaw(), pose.pitch());
+        prepareEntity(entity, pose.yaw(), pose.pitch(), previewTicks);
         matrices.push();
         try {
             matrices.translate(x + w / 2D, y + h * 0.85D, 50D);
@@ -207,7 +294,7 @@ public final class EntityIcon extends Icon {
             );
             EntityIconRenderContext.renderingEntityIcon(() ->
                     RenderSystem.runAsFancy(() ->
-                            dispatcher.render(entity, 0D, 0D, 0D, pose.yaw(), 1F, matrices, vertexConsumers, FULL_BRIGHT_LIGHT)
+                            dispatcher.render(entity, 0D, 0D, 0D, pose.yaw(), tickProgress, matrices, vertexConsumers, FULL_BRIGHT_LIGHT)
                     )
             );
             graphics.draw();
@@ -219,7 +306,8 @@ public final class EntityIcon extends Icon {
             DiffuseLighting.enableGuiDepthLighting();
         }
 
-        drawPlayerName(graphics, client, entity, x, y, w, h, scale);
+        EntityIconPlayerNameRenderer.draw(graphics, client, spec, color, entity, x, y, w, h, scale);
+        *///?}
     }
 
     private Entity getOrCreateEntity() {
@@ -232,7 +320,7 @@ public final class EntityIcon extends Icon {
             return client.player;
         }
 
-        EntityType<?> type = resolveType();
+        EntityType<?> type = EntityIconEntityFactory.resolveType(spec);
         if (!spec.isPlayer() && type == null) {
             return null;
         }
@@ -243,53 +331,14 @@ public final class EntityIcon extends Icon {
 
         cachedType = type;
         cachedWorld = client.world;
-        cachedEntity = createPreviewEntity(client, type);
+        cachedEntity = EntityIconEntityFactory.create(client, spec, type);
         if (cachedEntity != null) {
-            spec.createNbt().ifPresent(cachedEntity::readNbt);
+            EntityIconEntityFactory.applyNbt(spec, cachedEntity);
             cachedEntity.refreshPositionAndAngles(0D, 0D, 0D, 0F, 0F);
             cachedEntity.setNoGravity(true);
         }
 
         return cachedEntity;
-    }
-
-    @SuppressWarnings("deprecation")
-    private Entity createPreviewEntity(MinecraftClient client, EntityType<?> type) {
-        if (spec.isPlayer()) {
-            ClientWorld world = client.world;
-            if (world == null) {
-                return null;
-            }
-
-            return new PreviewPlayerEntity(world, spec, client.getSession().getUsername());
-        }
-
-        return createEntity(type, client.world);
-    }
-
-    @SuppressWarnings("deprecation")
-    private static Entity createEntity(EntityType<?> type, World world) {
-        return type.create(world);
-    }
-
-    private EntityType<?> resolveType() {
-        if (spec.isPlayer()) {
-            return null;
-        }
-
-        //? if forge {
-        /*return ForgeRegistries.ENTITY_TYPES.getValue(spec.entityId());
-        *///?} else {
-        return Registries.ENTITY_TYPE.getOrEmpty(spec.entityId()).orElse(null);
-        //?}
-    }
-
-    private static boolean isRegistered(Identifier entityId) {
-        //? if forge {
-        /*return ForgeRegistries.ENTITY_TYPES.containsKey(entityId);
-        *///?} else {
-        return Registries.ENTITY_TYPE.containsId(entityId);
-        //?}
     }
 
     static String stripPrefix(String value) {
@@ -299,14 +348,20 @@ public final class EntityIcon extends Icon {
         return value;
     }
 
-    private EntityPose getEntityPose(MinecraftClient client, MatrixStack matrices, int x, int y, int width, int height) {
+    private EntityPose getEntityPose(MinecraftClient client, ScreenRect rect) {
         EntityPose defaultPose = defaultPose();
         if (spec.lookAtCursorEnabled()) {
-            return cursorPose(client, transformedRect(matrices, x, y, width, height)).orElse(defaultPose);
+            return cursorPose(client, rect).orElse(defaultPose);
         }
 
         return defaultPose;
     }
+
+    //? if < 1.21.11 {
+    /*private EntityPose getEntityPose(MinecraftClient client, MatrixStack matrices, int x, int y, int width, int height) {
+        return getEntityPose(client, EntityIconRenderGeometry.transformedRect(matrices, x, y, width, height));
+    }
+    *///?}
 
     private EntityPose defaultPose() {
         return new EntityPose(FRONT_FACING_YAW, 0F, spec.rotationEnabled() ? currentYaw() : 0F);
@@ -343,91 +398,59 @@ public final class EntityIcon extends Icon {
         return Optional.of(new EntityPose(yaw, pitch, 0F));
     }
 
-    private static ScreenRect transformedRect(MatrixStack matrices, int x, int y, int width, int height) {
-        Matrix4f matrix = matrices.peek().getPositionMatrix();
-        Vector4f topLeft = transform(matrix, x, y);
-        Vector4f topRight = transform(matrix, x + width, y);
-        Vector4f bottomLeft = transform(matrix, x, y + height);
-        Vector4f bottomRight = transform(matrix, x + width, y + height);
-
-        double minX = Math.min(Math.min(topLeft.x, topRight.x), Math.min(bottomLeft.x, bottomRight.x));
-        double maxX = Math.max(Math.max(topLeft.x, topRight.x), Math.max(bottomLeft.x, bottomRight.x));
-        double minY = Math.min(Math.min(topLeft.y, topRight.y), Math.min(bottomLeft.y, bottomRight.y));
-        double maxY = Math.max(Math.max(topLeft.y, topRight.y), Math.max(bottomLeft.y, bottomRight.y));
-        return new ScreenRect((minX + maxX) / 2D, (minY + maxY) / 2D, maxX - minX, maxY - minY);
-    }
-
-    private static Vector4f transform(Matrix4f matrix, int x, int y) {
-        Vector4f point = new Vector4f(x, y, 0F, 1F);
-        point.mul(matrix);
-        return point;
-    }
-
-    private static void prepareEntity(Entity entity, float yaw, float pitch) {
-        entity.age = (int) (System.currentTimeMillis() / 50L);
+    private static void prepareEntity(Entity entity, float yaw, float pitch, float previewTicks) {
+        entity.age = (int) previewTicks;
         entity.setYaw(yaw);
-        entity.prevYaw = yaw;
+        //? if >= 1.21.11 {
+        entity.lastYaw = yaw;
+        //?} else {
+        /*entity.prevYaw = yaw;
+        *///?}
         entity.setPitch(pitch);
-        entity.prevPitch = pitch;
+        //? if >= 1.21.11 {
+        entity.lastPitch = pitch;
+        //?} else {
+        /*entity.prevPitch = pitch;
+        *///?}
         entity.setHeadYaw(yaw);
         entity.setBodyYaw(yaw);
 
         if (entity instanceof LivingEntity living) {
             living.headYaw = yaw;
-            living.prevHeadYaw = yaw;
+            //? if >= 1.21.11 {
+            living.lastHeadYaw = yaw;
+            //?} else {
+            /*living.prevHeadYaw = yaw;
+            *///?}
             living.bodyYaw = yaw;
-            living.prevBodyYaw = yaw;
+            //? if >= 1.21.11 {
+            living.lastBodyYaw = yaw;
+            //?} else {
+            /*living.prevBodyYaw = yaw;
+            *///?}
         }
     }
 
-    private static void setupEntityLighting() {
+    //? if < 1.21.11 {
+    /*private static void setupEntityLighting() {
         RenderSystem.setShaderLights(ENTITY_ICON_LIGHT, ENTITY_ICON_LIGHT);
     }
+    *///?}
 
     private static float renderScale(Entity entity, int width, int height) {
-        float entityWidth = Math.max(entity.getWidth(), MIN_ENTITY_SIZE);
-        float entityHeight = Math.max(entity.getHeight(), MIN_ENTITY_SIZE);
-        return Math.min(width / entityWidth, height / entityHeight) * MODEL_PADDING;
+        return renderScale(entity.getWidth(), entity.getHeight(), width, height);
     }
 
-    private void drawPlayerName(DrawContext graphics, MinecraftClient client, Entity entity, int x, int y, int width, int height, float scale) {
-        if (!spec.isPlayer() || !spec.playerNameVisible()) {
-            return;
-        }
-
-        String name = playerName(client, entity);
-        if (name.isBlank()) {
-            return;
-        }
-
-        MatrixStack matrices = graphics.getMatrices();
-        MatrixScale2D matrixScale = MatrixScale2D.from(matrices.peek().getPositionMatrix());
-        if (matrixScale.isInvalid()) {
-            return;
-        }
-
-        int textWidth = client.textRenderer.getWidth(name);
-        float labelX = x + width / 2F;
-        float labelY = (float) (y + height * 0.85D - entity.getHeight() * scale)
-                - (client.textRenderer.fontHeight + PLAYER_NAME_GAP) / matrixScale.y();
-        int labelColor = ((color.alphai() & 0xFF) << 24) | PLAYER_NAME_COLOR;
-
-        matrices.push();
-        try {
-            matrices.translate(labelX, labelY, 100D);
-            matrices.scale(1F / matrixScale.x(), 1F / matrixScale.y(), 1F);
-            graphics.drawTextWithShadow(client.textRenderer, name, -textWidth / 2, 0, labelColor);
-        } finally {
-            matrices.pop();
-        }
+    //? if >= 1.21.11 {
+    private static float renderScale(EntityRenderState state, int width, int height) {
+        return renderScale(state.width, state.height, width, height);
     }
+    //?}
 
-    private String playerName(MinecraftClient client, Entity entity) {
-        if (entity instanceof PreviewPlayerEntity previewPlayer) {
-            return previewPlayer.shouldShowPreviewName() ? previewPlayer.previewName() : "";
-        }
-
-        return spec.playerName(client.getSession().getUsername());
+    private static float renderScale(float width, float height, int targetWidth, int targetHeight) {
+        float entityWidth = Math.max(width, MIN_ENTITY_SIZE);
+        float entityHeight = Math.max(height, MIN_ENTITY_SIZE);
+        return Math.min(targetWidth / entityWidth, targetHeight / entityHeight) * MODEL_PADDING;
     }
 
     private static float currentYaw() {
@@ -436,16 +459,5 @@ public final class EntityIcon extends Icon {
     }
 
     private record EntityPose(float yaw, float pitch, float modelYaw) {
-    }
-
-    private record ScreenRect(double centerX, double centerY, double width, double height) {
-        boolean isValid() {
-            return Double.isFinite(centerX)
-                    && Double.isFinite(centerY)
-                    && Double.isFinite(width)
-                    && Double.isFinite(height)
-                    && width > 0D
-                    && height > 0D;
-        }
     }
 }

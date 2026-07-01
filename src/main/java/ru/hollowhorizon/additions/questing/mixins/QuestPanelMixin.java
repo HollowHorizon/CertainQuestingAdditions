@@ -7,11 +7,31 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
-import dev.ftb.mods.ftblibrary.ui.ContextMenu;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenu;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.ContextMenu;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Panel;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Theme;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Widget;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -21,11 +41,14 @@ import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.gui.DrawContext;
 //? if < 1.21.1 {
-import net.minecraft.client.render.BufferBuilder;
-//?}
+/*import net.minecraft.client.render.BufferBuilder;
+*///?}
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
+//? if >= 1.21.11 {
+import org.joml.Matrix3x2fStack;
+//?}
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,6 +57,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
 import ru.hollowhorizon.additions.questing.client.EntityAttachmentActions;
+import ru.hollowhorizon.additions.questing.client.FtbIconRenderer;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
 import ru.hollowhorizon.additions.questing.client.QuestScreenZoom;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
@@ -49,9 +73,14 @@ public abstract class QuestPanelMixin extends Panel {
     @Shadow protected double questX;
     @Shadow protected double questY;
 
-    //? if >= 1.21.1 {
-    @Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
-    //?} else {
+    //? if >= 1.21.11 {
+    @Shadow
+    private void renderConnection(DrawContext graphics, Icon<?> icon, Widget widget, QuestButton button, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
+        throw new AssertionError();
+    }
+    //?} else if >= 1.21.1 {
+    /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
+    *///?} else {
     /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
     *///?}
     public QuestPanelMixin(Panel panel) {
@@ -68,7 +97,11 @@ public abstract class QuestPanelMixin extends Panel {
         }
     }
 
-    @WrapOperation(method = "mousePressed", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;openContextMenu(Ljava/util/List;)Ldev/ftb/mods/ftblibrary/ui/ContextMenu;"))
+    //? if >= 1.21.11 {
+    @WrapOperation(method = "mousePressed", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;openContextMenu(Ljava/util/List;)Ldev/ftb/mods/ftblibrary/client/gui/widget/ContextMenu;"))
+    //?} else {
+    /*@WrapOperation(method = "mousePressed", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/quests/QuestScreen;openContextMenu(Ljava/util/List;)Ldev/ftb/mods/ftblibrary/ui/ContextMenu;"))
+    *///?}
     private ContextMenu cqa$addEntityCanvasContextItem(QuestScreen screen, List<ContextMenuItem> items, Operation<ContextMenu> original) {
         EntityAttachmentActions.addCanvasContextMenuEntry(screen, items, questX, questY);
         return original.call(screen, items);
@@ -82,13 +115,18 @@ public abstract class QuestPanelMixin extends Panel {
         //? if >= 1.21.1 {
         if (selectedChapter != null && file.selfTeamData != null) {
             Tessellator tesselator = Tessellator.getInstance();
-            Icon icon = (Icon)ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(selectedChapter);
-            if (icon instanceof ImageIcon) {
-                ImageIcon img = (ImageIcon)icon;
+            Icon dependencyLineIcon = (Icon) ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(selectedChapter);
+            if (!(dependencyLineIcon instanceof ImageIcon)) {
+                dependencyLineIcon = DEFAULT_DEPENDENCY_LINE_TEXTURE;
+            }
+            //? if < 1.21.11 {
+            /*if (dependencyLineIcon instanceof ImageIcon) {
+                ImageIcon img = (ImageIcon) dependencyLineIcon;
                 img.bindTexture();
             } else {
                 DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
             }
+            *///?}
 
             Quest selectedQuest = this.questScreen.getViewedQuest();
             if (selectedQuest == null) {
@@ -102,8 +140,10 @@ public abstract class QuestPanelMixin extends Panel {
             float zoom = QuestAnimationsConfig.SMOOTH_SCROLLING.get() ? ((QuestScreenZoom) this.questScreen).cqa$getZoom() : questScreen.getZoom();
             float lineWidth = (float)(zoom * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(selectedChapter) / (double)4.0F * (double)3.0F);
 
-            RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+            //? if < 1.21.11 {
+            /*RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            *///?}
             float mu = (float)(mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(selectedChapter) % (double)1.0F);
 
             for(Widget widget : this.widgets) {
@@ -121,7 +161,11 @@ public abstract class QuestPanelMixin extends Panel {
                         for(QuestButton button : qb.getDependencies()) {
                             var dependentQuest = ((QuestButtonAccessor) button).getQuest();
                             if (button.shouldDraw() && quest != selectedQuest && dependentQuest != selectedQuest && !dependentQuest.shouldHideDependentLines()) {
-                                this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu, tesselator);
+                                //? if >= 1.21.11 {
+                                this.renderConnection(graphics, dependencyLineIcon, widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu);
+                                //?} else {
+                                /*this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu, tesselator);
+                                *///?}
                             }
                         }
                     }
@@ -143,7 +187,11 @@ public abstract class QuestPanelMixin extends Panel {
                                 if (((QuestButtonAccessor) button).getQuest() != selectedQuest && !button.isMouseOver()) {
                                     if (quest == selectedQuest || qb.isMouseOver()) {
                                         Color4I c = original.lerp(ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(selectedChapter), ((QuestButtonAnimator) qb).cqa$getAnimator().get());
-                                        this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+                                        //? if >= 1.21.11 {
+                                        this.renderConnection(graphics, dependencyLineIcon, widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms);
+                                        //?} else {
+                                        /*this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+                                        *///?}
                                     }
                                 } else {
                                     Color4I c = original.lerp(ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(selectedChapter), ((QuestButtonAnimator) button).cqa$getAnimator().get());
@@ -157,7 +205,11 @@ public abstract class QuestPanelMixin extends Panel {
                                         toOutline.add(qb);
                                     }
 
-                                    this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+                                    //? if >= 1.21.11 {
+                                    this.renderConnection(graphics, dependencyLineIcon, widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms);
+                                    //?} else {
+                                    /*this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+                                    *///?}
                                 }
                             }
                         }
@@ -167,8 +219,8 @@ public abstract class QuestPanelMixin extends Panel {
 
             toOutline.forEach((qbx) -> {
                 var quest = ((QuestButtonAccessor) qbx).getQuest();
-                QuestShape.get(quest.getShape()).getShape().withColor(Color4I.BLACK.withAlpha(30)).draw(graphics, qbx.getX(), qbx.getY(), qbx.width, qbx.height);
-                QuestShape.get(quest.getShape()).getOutline().withColor(Color4I.BLACK.withAlpha(90)).draw(graphics, qbx.getX(), qbx.getY(), qbx.width, qbx.height);
+                FtbIconRenderer.draw(QuestShape.get(quest.getShape()).getShape().withColor(Color4I.BLACK.withAlpha(30)), graphics, qbx.getX(), qbx.getY(), qbx.width, qbx.height);
+                FtbIconRenderer.draw(QuestShape.get(quest.getShape()).getOutline().withColor(Color4I.BLACK.withAlpha(90)), graphics, qbx.getX(), qbx.getY(), qbx.width, qbx.height);
             });
         }
         //?} else {

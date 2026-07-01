@@ -2,11 +2,31 @@ package ru.hollowhorizon.additions.questing.mixins;
 
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Button;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.GuiHelper;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Panel;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Theme;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+*///?}
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestButton;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -26,6 +46,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.hollowhorizon.additions.questing.client.ApngTextureManager;
 import ru.hollowhorizon.additions.questing.client.Animator;
+import ru.hollowhorizon.additions.questing.client.FtbIconRenderer;
+import ru.hollowhorizon.additions.questing.client.GuiMatrices;
 import ru.hollowhorizon.additions.questing.client.QuestButtonAnimator;
 import ru.hollowhorizon.additions.questing.client.QuestPanelAnimator;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
@@ -97,7 +119,11 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
                 }
 
                 if (this.quest.getProgressionMode() == ProgressionMode.FLEXIBLE && this.quest.allTasksCompleted(teamData)) {
-                    questIcon = new ThemeProperties.CheckIcon(Color4I.rgb(6316128), Color4I.rgb(8421504));
+                    //? if >= 1.21.11 {
+                    questIcon = ThemeProperties.CHECK_ICON_GRAY.get(this.quest);
+                    //?} else {
+                    /*questIcon = new ThemeProperties.CheckIcon(Color4I.rgb(6316128), Color4I.rgb(8421504));
+                    *///?}
                 }
             }
         } else {
@@ -112,20 +138,19 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
             hiddenIcon = ThemeProperties.HIDDEN_ICON.get();
         }
 
-        MatrixStack poseStack = graphics.getMatrices();
         QuestShape shape = QuestShape.get(this.getShape());
         float scale = 1.0f + 0.1f * factor;
         float dx = (w * scale - w) / 2f;
         float dy = (h * scale - h) / 2f;
 
         if (shape.shouldDraw()) {
-            poseStack.push();
-            poseStack.translate(x - dx, y - dy, 0);
-            poseStack.scale(scale, scale, scale);
-            shape.getShape().withColor(Color4I.DARK_GRAY).draw(graphics, 0, 0, w, h);
-            shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)).draw(graphics, 0, 0, w, h);
-            shape.getOutline().withColor(outlineColor).draw(graphics, 0, 0, w, h);
-            poseStack.pop();
+            GuiMatrices.push(graphics);
+            GuiMatrices.translate(graphics, x - dx, y - dy, 0);
+            GuiMatrices.scale(graphics, scale, scale, scale);
+            FtbIconRenderer.draw(shape.getShape().withColor(Color4I.DARK_GRAY), graphics, 0, 0, w, h);
+            FtbIconRenderer.draw(shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)), graphics, 0, 0, w, h);
+            FtbIconRenderer.draw(shape.getOutline().withColor(outlineColor), graphics, 0, 0, w, h);
+            GuiMatrices.pop(graphics);
         }
 
         if (!this.icon.isEmpty()) {
@@ -134,28 +159,30 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
             float iconY = y + (h - s) / 2.0F;
             float iconDx = (s * scale - s) / 2.0F;
             float iconDy = (s * scale - s) / 2.0F;
-            poseStack.push();
-            poseStack.translate(iconX - iconDx, iconY - iconDy, 0.0F);
-            poseStack.scale(scale, scale, scale);
-            this.icon.draw(graphics, 0, 0, s, s);
-            poseStack.pop();
+            GuiMatrices.push(graphics);
+            GuiMatrices.translate(graphics, iconX - iconDx, iconY - iconDy, 0.0F);
+            GuiMatrices.scale(graphics, scale, scale, scale);
+            FtbIconRenderer.draw(this.icon, graphics, 0, 0, s, s);
+            GuiMatrices.pop(graphics);
         }
 
-        GuiHelper.setupDrawing();
+        //? if < 1.21.11 {
+        /*GuiHelper.setupDrawing();
+        *///?}
 
         if (this.questScreen.getViewedQuest() == this.quest || selectedObjects.contains(this.moveAndDeleteFocus())) {
-            poseStack.push();
-            poseStack.translate(x - dx, y - dy, 1.0F);
-            poseStack.scale(scale, scale, scale);
+            GuiMatrices.push(graphics);
+            GuiMatrices.translate(graphics, x - dx, y - dy, 1.0F);
+            GuiMatrices.scale(graphics, scale, scale, scale);
             Color4I col = Color4I.WHITE.withAlpha((int) ((double) 190.0F + Math.sin((double) System.currentTimeMillis() * 0.003) * (double) 50.0F));
-            shape.getOutline().withColor(col).draw(graphics, 0, 0, w, h);
-            shape.getBackground().withColor(col).draw(graphics, 0, 0, w, h);
-            poseStack.pop();
+            FtbIconRenderer.draw(shape.getOutline().withColor(col), graphics, 0, 0, w, h);
+            FtbIconRenderer.draw(shape.getBackground().withColor(col), graphics, 0, 0, w, h);
+            GuiMatrices.pop(graphics);
         }
 
         if (!canStart || !teamData.areDependenciesComplete(this.quest)) {
             if (shape.shouldDraw()) {
-                shape.getShape().withColor(Color4I.BLACK.withAlpha(100)).draw(graphics, x, y, w, h);
+                FtbIconRenderer.draw(shape.getShape().withColor(Color4I.BLACK.withAlpha(100)), graphics, x, y, w, h);
             }
 
             if (this.quest.getQuestFile().showLockIcons() && (Boolean) FTBQuestsClientConfig.SHOW_LOCK_ICON.get()) {
@@ -164,7 +191,7 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         }
 
         if (this.isMouseOver()) {
-            shape.getShape().withColor(Color4I.WHITE.withAlpha((int) (QuestAnimationsConfig.QUEST_HOVER_GLOW_ALPHA.get() * factor))).draw(graphics, x, y, w, h);
+            FtbIconRenderer.draw(shape.getShape().withColor(Color4I.WHITE.withAlpha((int) (QuestAnimationsConfig.QUEST_HOVER_GLOW_ALPHA.get() * factor))), graphics, x, y, w, h);
         }
 
         //? if >= 1.21.1 {
@@ -175,29 +202,29 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
 
         if (!questIcon.isEmpty()) {
             int s = (int) ((float) w / 8.0F * 3.0F);
-            poseStack.push();
-            poseStack.translate(x + w - s - dx, y - dy, offset);
-            poseStack.scale(scale, scale, scale);
-            questIcon.draw(graphics, 0, 0, s, s);
-            poseStack.pop();
+            GuiMatrices.push(graphics);
+            GuiMatrices.translate(graphics, x + w - s - dx, y - dy, offset);
+            GuiMatrices.scale(graphics, scale, scale, scale);
+            FtbIconRenderer.draw(questIcon, graphics, 0, 0, s, s);
+            GuiMatrices.pop(graphics);
         }
 
         if (!hiddenIcon.isEmpty()) {
             int s = (int) ((float) w / 8.0F * 3.0F);
-            poseStack.push();
-            poseStack.translate(x - dx, y - dy, offset);
-            poseStack.scale(scale, scale, scale);
-            hiddenIcon.draw(graphics, 0, 0, s, s);
-            poseStack.pop();
+            GuiMatrices.push(graphics);
+            GuiMatrices.translate(graphics, x - dx, y - dy, offset);
+            GuiMatrices.scale(graphics, scale, scale, scale);
+            FtbIconRenderer.draw(hiddenIcon, graphics, 0, 0, s, s);
+            GuiMatrices.pop(graphics);
         }
 
         if (!lockIcon.isEmpty() && !this.quest.shouldHideLockIcon()) {
             int s = (int) ((float) w / 8.0F * 3.0F);
-            poseStack.push();
-            poseStack.translate(x + w - s - dx, y + h - 1 - s - dy, offset);
-            poseStack.scale(scale, scale, scale);
-            lockIcon.draw(graphics, 0, 0, s, s);
-            poseStack.pop();
+            GuiMatrices.push(graphics);
+            GuiMatrices.translate(graphics, x + w - s - dx, y + h - 1 - s - dy, offset);
+            GuiMatrices.scale(graphics, scale, scale, scale);
+            FtbIconRenderer.draw(lockIcon, graphics, 0, 0, s, s);
+            GuiMatrices.pop(graphics);
         }
 
         ci.cancel();

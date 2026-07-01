@@ -3,12 +3,22 @@ package ru.hollowhorizon.additions.questing.client;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+//? if >= 1.21.11 {
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.SignatureState;
+import com.mojang.authlib.minecraft.MinecraftProfileTextures;
+import com.mojang.authlib.properties.Property;
+//?}
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 //? if >= 1.21.1 {
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.minecraft.client.util.DefaultSkinHelper;
-import net.minecraft.client.util.SkinTextures;
+//? if >= 1.21.11 {
+import net.minecraft.entity.player.SkinTextures;
+//?} else {
+/*import net.minecraft.client.util.SkinTextures;
+*///?}
 //?} else {
 /*import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.util.DefaultSkinHelper;
@@ -36,6 +46,7 @@ import java.util.concurrent.Executors;
 public final class PlayerPreviewProfiles {
     private static final String PROFILE_BY_NAME_URL = "https://api.mojang.com/users/profiles/minecraft/";
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(8);
+    private static final Duration FAILED_PROFILE_RETRY_DELAY = Duration.ofSeconds(10);
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(REQUEST_TIMEOUT)
             .build();
@@ -44,7 +55,7 @@ public final class PlayerPreviewProfiles {
         thread.setDaemon(true);
         return thread;
     });
-    private static final ConcurrentMap<String, CompletableFuture<Optional<GameProfile>>> PROFILE_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, ProfileCacheEntry> PROFILE_CACHE = new ConcurrentHashMap<>();
 
     private PlayerPreviewProfiles() {
     }
@@ -68,7 +79,11 @@ public final class PlayerPreviewProfiles {
             return DefaultSkinHelper.getSkinTextures(profile);
         }
 
-        return client.getSkinProvider().getSkinTextures(profile);
+        //? if >= 1.21.11 {
+        return client.getSkinProvider().supplySkinTextures(profile, false).get();
+        //?} else {
+        /*return client.getSkinProvider().getSkinTextures(profile);
+        *///?}
     }
     //?} else {
     /*public static Identifier skinTexture(EntityIconSpec spec, String fallbackName) {
@@ -108,15 +123,49 @@ public final class PlayerPreviewProfiles {
             return Optional.empty();
         }
 
-        CompletableFuture<Optional<GameProfile>> future = PROFILE_CACHE.computeIfAbsent(key, ignored ->
-                CompletableFuture.supplyAsync(() -> supplier.get(sessionService), RESOLVER_EXECUTOR)
-                        .exceptionally(error -> Optional.empty())
-        );
-        return future.getNow(Optional.empty());
+        long now = System.nanoTime();
+        ProfileCacheEntry entry = PROFILE_CACHE.compute(key, (ignored, current) -> {
+            if (current != null && !current.shouldRetry(now)) {
+                return current;
+            }
+
+            return new ProfileCacheEntry(
+                    CompletableFuture.supplyAsync(() -> supplier.get(sessionService), RESOLVER_EXECUTOR)
+                            .exceptionally(error -> Optional.empty()),
+                    now
+            );
+        });
+        return entry.future().getNow(Optional.empty());
     }
 
     private static Optional<GameProfile> fetchProfile(String name, MinecraftSessionService sessionService) {
-        return fetchNameProfile(name).flatMap(profile -> fillProfile(sessionService, new GameProfile(profile.uuid(), profile.name())));
+        //? if >= 1.21.11 {
+        GameProfileRepository repository = profileRepository();
+        Optional<NameProfile> resolvedNameProfile = Optional.empty();
+        if (repository != null) {
+            resolvedNameProfile = fetchNameProfile(repository, name);
+        }
+
+        return resolvedNameProfile
+                .or(() -> fetchNameProfile(name))
+                .flatMap(profile -> fillProfile(sessionService, new GameProfile(profile.uuid(), profile.name())));
+        //?} else {
+        /*return fetchNameProfile(name).flatMap(profile -> fillProfile(sessionService, new GameProfile(profile.uuid(), profile.name())));
+        *///?}
+    }
+
+    //? if >= 1.21.11 {
+    private static Optional<NameProfile> fetchNameProfile(GameProfileRepository repository, String name) {
+        return repository.findProfileByName(name).map(profile -> new NameProfile(profile.id(), profile.name()));
+    }
+    //?}
+
+    private record ProfileCacheEntry(CompletableFuture<Optional<GameProfile>> future, long createdAtNanos) {
+        private boolean shouldRetry(long now) {
+            return future.isDone()
+                    && future.getNow(Optional.empty()).isEmpty()
+                    && now - createdAtNanos >= FAILED_PROFILE_RETRY_DELAY.toNanos();
+        }
     }
 
     private static Optional<GameProfile> fetchProfile(UUID uuid, String name, MinecraftSessionService sessionService) {
@@ -163,22 +212,69 @@ public final class PlayerPreviewProfiles {
 
     private static Optional<GameProfile> fillProfile(MinecraftSessionService sessionService, GameProfile profile) {
         //? if >= 1.21.1 {
-        ProfileResult result = sessionService.fetchProfile(profile.getId(), true);
+        //? if >= 1.21.11 {
+        return fetchProfile(sessionService, profile.id(), true)
+                .or(() -> fetchProfile(sessionService, profile.id(), false));
+        //?} else {
+        /*ProfileResult result = sessionService.fetchProfile(profile.getId(), true);
         if (result == null || result.profile() == null) {
             return Optional.empty();
         }
 
         return Optional.of(result.profile());
+        *///?}
         //?} else {
         /*GameProfile filledProfile = sessionService.fillProfileProperties(profile, true);
         return Optional.ofNullable(filledProfile);
         *///?}
     }
 
+    //? if >= 1.21.11 {
+    private static Optional<GameProfile> fetchProfile(MinecraftSessionService sessionService, UUID uuid, boolean requireSecure) {
+        ProfileResult result = sessionService.fetchProfile(uuid, requireSecure);
+        if (result == null || result.profile() == null || !hasUsableTextures(sessionService, result.profile(), requireSecure)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(result.profile());
+    }
+
+    private static boolean hasUsableTextures(MinecraftSessionService sessionService, GameProfile profile, boolean requireSecure) {
+        Property textures = sessionService.getPackedTextures(profile);
+        if (textures == null) {
+            return false;
+        }
+
+        MinecraftProfileTextures unpackedTextures = sessionService.unpackTextures(textures);
+        if (!hasAnyTexture(unpackedTextures)) {
+            return false;
+        }
+
+        return requireSecure
+                ? unpackedTextures.signatureState() == SignatureState.SIGNED
+                : unpackedTextures.signatureState() != SignatureState.INVALID;
+    }
+
+    private static boolean hasAnyTexture(MinecraftProfileTextures textures) {
+        return textures.skin() != null || textures.cape() != null || textures.elytra() != null;
+    }
+    //?}
+
     private static MinecraftSessionService sessionService() {
         MinecraftClient client = MinecraftClient.getInstance();
-        return client == null ? null : client.getSessionService();
+        //? if >= 1.21.11 {
+        return client == null ? null : client.getApiServices().sessionService();
+        //?} else {
+        /*return client == null ? null : client.getSessionService();
+        *///?}
     }
+
+    //? if >= 1.21.11 {
+    private static GameProfileRepository profileRepository() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return client == null ? null : client.getApiServices().profileRepository();
+    }
+    //?}
 
     private static URI profileByNameUri(String name) {
         return URI.create(PROFILE_BY_NAME_URL + URLEncoder.encode(name, StandardCharsets.UTF_8));

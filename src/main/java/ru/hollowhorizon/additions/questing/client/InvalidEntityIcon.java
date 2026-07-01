@@ -5,7 +5,11 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import net.minecraft.client.gui.DrawContext;
 
-public final class InvalidEntityIcon extends Icon {
+//? if >= 1.21.11 {
+public final class InvalidEntityIcon extends Icon<InvalidEntityIcon> {
+//?} else {
+/*public final class InvalidEntityIcon extends Icon {
+*///?}
     private final String value;
     private final Color4I color;
 
@@ -18,25 +22,38 @@ public final class InvalidEntityIcon extends Icon {
         this.color = color;
     }
 
+    //? if >= 1.21.11 {
     @Override
+    public InvalidEntityIconRenderer getRenderer() {
+        return InvalidEntityIconRenderer.INSTANCE;
+    }
+
+    public void render(DrawContext graphics, int x, int y, int w, int h) {
+        FtbIconRenderer.draw(Icons.BARRIER.withColor(color), graphics, x, y, w, h);
+    }
+    //?} else {
+    /*@Override
     public void draw(DrawContext graphics, int x, int y, int w, int h) {
-        Icons.BARRIER.withColor(color).draw(graphics, x, y, w, h);
+        FtbIconRenderer.draw(Icons.BARRIER.withColor(color), graphics, x, y, w, h);
     }
+    *///?}
 
     @Override
-    public Icon copy() {
+    public InvalidEntityIcon copy() {
         return new InvalidEntityIcon(value, color);
     }
 
     @Override
-    public Icon withColor(Color4I color) {
+    public InvalidEntityIcon withColor(Color4I color) {
         return new InvalidEntityIcon(value, color);
     }
 
-    @Override
+    //? if < 1.21.11 {
+    /*@Override
     public double aspectRatio() {
         return 1D;
     }
+    *///?}
 
     @Override
     public String toString() {

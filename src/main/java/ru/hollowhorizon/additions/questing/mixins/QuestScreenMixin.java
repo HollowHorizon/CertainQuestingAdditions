@@ -1,8 +1,16 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Theme;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestPanel;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.Chapter;
@@ -82,7 +90,8 @@ public abstract class QuestScreenMixin extends BaseScreen implements QuestScreen
         ApngTextureManager.clearCache();
     }
 
-    @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"), remap = true)
+    //? if < 1.21.11 {
+    /*@Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"), remap = true)
     private void drawCustomBackground(BaseScreen instance, DrawContext graphics, Theme theme, int x, int y, int w, int h) {
         if (QuestAnimationsConfig.SHADER_BACKGROUND.get()) {
             CustomBackgroundRenderer.draw(graphics, selectedChapter, x, y, w, h, questPanel.getScrollX(), questPanel.getScrollY(), scrollWidth, scrollHeight, cqa$getZoom());
@@ -90,6 +99,7 @@ public abstract class QuestScreenMixin extends BaseScreen implements QuestScreen
             super.drawBackground(graphics, theme, x, y, w, h);
         }
     }
+    *///?}
 
     @Inject(method = "getQuestButtonSize", at = @At("HEAD"), cancellable = true)
     public void onGetQuestButtonSize(CallbackInfoReturnable<Double> cir) {
