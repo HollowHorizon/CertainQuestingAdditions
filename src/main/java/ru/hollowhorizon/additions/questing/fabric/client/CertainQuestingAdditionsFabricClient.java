@@ -12,15 +12,15 @@ import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
 import ru.hollowhorizon.additions.questing.mixins.RenderPipelinesAccessor;
 import ru.hollowhorizon.additions.questing.registry.ModShaders;
 //?} else {
-import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
+/^import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
 import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
-//?}
+^///?}
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 //? if < 1.21.11 {
-import ru.hollowhorizon.additions.questing.registry.ModShaders;
-//?}
+/^import ru.hollowhorizon.additions.questing.registry.ModShaders;
+^///?}
 
 public final class CertainQuestingAdditionsFabricClient implements ClientModInitializer {
     @Override
@@ -38,12 +38,12 @@ public final class CertainQuestingAdditionsFabricClient implements ClientModInit
             ModShaders.register(shaderId, pipeline);
         }
         //?} else {
-        CoreShaderRegistrationCallback.EVENT.register((CoreShaderRegistrationCallback.RegistrationContext context) -> {
+        /^CoreShaderRegistrationCallback.EVENT.register((CoreShaderRegistrationCallback.RegistrationContext context) -> {
             for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
                 context.register(shaderId, VertexFormats.POSITION_TEXTURE, shader -> ModShaders.register(shaderId, shader));
             }
         });
-        //?}
+        ^///?}
     }
 }
 *///?} else {
