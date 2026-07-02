@@ -19,6 +19,7 @@
     "ChapterPanelGroupButtonMixin",
     "ChapterPanelMixin",
     "ChapterPanelModpackButtonMixin",
+    "EmiRecipeScreenMixin",
     //? if < 1.21.11 {
     /*"EntityRenderDispatcherAccessor",
     "EntityRendererMixin",
