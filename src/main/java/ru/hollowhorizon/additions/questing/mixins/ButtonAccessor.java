@@ -1,7 +1,11 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Button;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Button;
+*///?}
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

@@ -1,12 +1,29 @@
 package ru.hollowhorizon.additions.questing.client;
 
-import dev.ftb.mods.ftblibrary.config.StringConfig;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+*///?}
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Panel;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
@@ -74,7 +91,7 @@ public final class EntityAttachmentActions {
             return;
         }
 
-        ChapterImage image = new ChapterImage(chapter)
+        ChapterImage image = createChapterImage(chapter)
                 .setImage(icon)
                 .setPosition(questX, questY);
         image.fixupAspectRatio(true);
@@ -83,8 +100,20 @@ public final class EntityAttachmentActions {
         screen.refreshQuestPanel();
     }
 
+    private static ChapterImage createChapterImage(Chapter chapter) {
+        //? if >= 1.21.11 {
+        return new ChapterImage(chapter.getQuestFile().newID(), chapter);
+        //?} else {
+        /*return new ChapterImage(chapter);
+        *///?}
+    }
+
     private static void openEntityInput(Panel panel, Consumer<EntityIcon> onAccepted) {
-        StringConfig config = new StringConfig(null);
+        //? if >= 1.21.11 {
+        EditableString config = new EditableString();
+        //?} else {
+        /*StringConfig config = new StringConfig(null);
+        *///?}
         config.setValue(DEFAULT_ENTITY_ID);
 
         EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(

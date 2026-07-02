@@ -2,8 +2,16 @@ package ru.hollowhorizon.additions.questing.mixins;
 
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.GuiHelper;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Theme;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.quests.ChapterPanel;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -18,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.hollowhorizon.additions.questing.client.Animator;
+import ru.hollowhorizon.additions.questing.client.FtbIconRenderer;
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 
 @Mixin(value = ChapterPanel.ChapterGroupButton.class, remap = false)
@@ -41,7 +50,9 @@ public abstract class ChapterPanelGroupButtonMixin extends ChapterPanel.ListButt
     private void onDraw(DrawContext graphics, Theme theme, int x, int y, int w, int h, CallbackInfo ci) {
         if (!QuestAnimationsConfig.PANEL_BUTTON_HOVER.get()) return;
 
-        GuiHelper.setupDrawing();
+        //? if < 1.21.11 {
+        /*GuiHelper.setupDrawing();
+        *///?}
         if (isMouseOver()) mou$animator.set(1f);
         else mou$animator.set(0.0f);
         mou$animator.update();
@@ -49,12 +60,12 @@ public abstract class ChapterPanelGroupButtonMixin extends ChapterPanel.ListButt
 
         //? if >= 1.21.1 {
         if (this.xlateWarning) {
-            Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+            FtbIconRenderer.draw(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
         }
         //?}
 
         if (factor > 0) {
-            Color4I.WHITE.withAlpha((int) (QuestAnimationsConfig.BUTTON_HOVER_GLOW_ALPHA.get() * factor)).draw(graphics, x + 1, y, w - 2, h);
+            FtbIconRenderer.draw(Color4I.WHITE.withAlpha((int) (QuestAnimationsConfig.BUTTON_HOVER_GLOW_ALPHA.get() * factor)), graphics, x + 1, y, w - 2, h);
         }
 
         var c1 = 16777215;
@@ -67,11 +78,11 @@ public abstract class ChapterPanelGroupButtonMixin extends ChapterPanel.ListButt
         int mixed = (r << 16) | (g << 8) | b;
 
 
-        (this.group.isGuiCollapsed() ? ChapterPanel.ARROW_COLLAPSED : ChapterPanel.ARROW_EXPANDED).withColor(Color4I.rgb(r, g, b)).draw(graphics, x + 3, y + 5, 8, 8);
+        FtbIconRenderer.draw((this.group.isGuiCollapsed() ? ChapterPanel.ARROW_COLLAPSED : ChapterPanel.ARROW_EXPANDED).withColor(Color4I.rgb(r, g, b)), graphics, x + 3, y + 5, 8, 8);
         theme.drawString(graphics, Text.literal("").append(this.title).setStyle(Style.EMPTY.withColor(mixed)), x + 15, y + 5);
         boolean canEdit = ((QuestScreenAccessor) ((ChapterPanelAccessor) this.chapterPanel).getQuestScreen()).getFile().canEdit();
         if (canEdit) {
-            ThemeProperties.ADD_ICON.get().draw(graphics, x + w - 14, y + 3, 12, 12);
+            FtbIconRenderer.draw(ThemeProperties.ADD_ICON.get(), graphics, x + w - 14, y + 3, 12, 12);
         }
 
         ci.cancel();

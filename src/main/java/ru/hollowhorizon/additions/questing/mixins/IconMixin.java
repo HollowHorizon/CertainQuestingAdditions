@@ -18,10 +18,12 @@ public abstract class IconMixin {
         cqa$getEntityIconOrFallback(id).ifPresent(cir::setReturnValue);
     }
 
-    @Inject(method = "getIcon0(Ljava/lang/String;)Ldev/ftb/mods/ftblibrary/icon/Icon;", at = @At("HEAD"), cancellable = true)
+    //? if < 1.21.11 {
+    /*@Inject(method = "getIcon0(Ljava/lang/String;)Ldev/ftb/mods/ftblibrary/icon/Icon;", at = @At("HEAD"), cancellable = true)
     private static void cqa$getEntityIcon0(String id, CallbackInfoReturnable<Icon> cir) {
         cqa$getEntityIconOrFallback(id).ifPresent(cir::setReturnValue);
     }
+    *///?}
 
     @Unique
     private static Optional<Icon> cqa$getEntityIconOrFallback(String id) {

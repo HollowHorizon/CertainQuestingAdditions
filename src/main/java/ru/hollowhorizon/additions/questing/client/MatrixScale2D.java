@@ -1,6 +1,10 @@
 package ru.hollowhorizon.additions.questing.client;
 
 import net.minecraft.util.math.MathHelper;
+//? if >= 1.21.11 {
+import org.joml.Matrix3x2f;
+import org.joml.Vector2f;
+//?}
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -21,6 +25,15 @@ final class MatrixScale2D {
         Vector4f yAxis = transform(matrix, 0, 1);
         return new MatrixScale2D(distance(origin, xAxis), distance(origin, yAxis));
     }
+
+    //? if >= 1.21.11 {
+    static MatrixScale2D from(Matrix3x2f matrix) {
+        Vector2f origin = transform(matrix, 0, 0);
+        Vector2f xAxis = transform(matrix, 1, 0);
+        Vector2f yAxis = transform(matrix, 0, 1);
+        return new MatrixScale2D(distance(origin, xAxis), distance(origin, yAxis));
+    }
+    //?}
 
     boolean isInvalid() {
         return !Float.isFinite(x)
@@ -48,4 +61,16 @@ final class MatrixScale2D {
         float dy = first.y - second.y;
         return MathHelper.sqrt(dx * dx + dy * dy);
     }
+
+    //? if >= 1.21.11 {
+    private static Vector2f transform(Matrix3x2f matrix, int x, int y) {
+        return matrix.transformPosition(x, y, new Vector2f());
+    }
+
+    private static float distance(Vector2f first, Vector2f second) {
+        float dx = first.x - second.x;
+        float dy = first.y - second.y;
+        return MathHelper.sqrt(dx * dx + dy * dy);
+    }
+    //?}
 }

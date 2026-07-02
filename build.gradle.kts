@@ -29,17 +29,34 @@ afterEvaluate {
 repositories {
     maven("https://maven.fabricmc.net/")
     maven("https://maven.terraformersmc.com/")
+    maven("https://maven.ftb.dev/releases")
     flatDir {
         dirs(rootDir.resolve("libs"))
     }
 }
 
+sourceSets {
+    named("main") {
+        resources.setSrcDirs(listOf(layout.buildDirectory.dir("generated/stonecutter/main/resources")))
+    }
+}
+
+tasks.named<Copy>("processResources") {
+    dependsOn("stonecutterGenerate")
+}
+
 dependencies {
     val platform = stonecutter.current.project.substringAfterLast('-')
     val version = stonecutter.current.project.substringBeforeLast('-')
+    val emiVersion = when (version) {
+        "1.21.11" -> "1.1.24+1.21.1"
+        else -> "1.1.22+$version"
+    }
 
-    modCompileOnly("dev.emi:emi-$platform:1.1.22+$version:api")
-    modRuntimeOnly("dev.emi:emi-$platform:1.1.22+$version")
+    modCompileOnly("dev.emi:emi-$platform:$emiVersion:api")
+    if (version != "1.21.11") {
+        modRuntimeOnly("dev.emi:emi-$platform:$emiVersion")
+    }
 
     when (version) {
         "1.20.1" -> {
@@ -77,10 +94,25 @@ dependencies {
                 modImplementation("lib:architectury:13.0.8-neoforge")
             }
         }
+
+        "1.21.11" -> {
+            if (platform == "fabric") {
+                modImplementation("dev.ftb.mods:ftb-library-fabric:2111.1.1")
+                modImplementation("dev.ftb.mods:ftb-quests-fabric:2111.1.5")
+                modImplementation("dev.ftb.mods:ftb-teams-fabric:2111.1.1")
+                modImplementation("dev.architectury:architectury-fabric:19.0.1")
+                modRuntimeOnly("teamreborn:energy:4.1.0")
+            } else {
+                modImplementation("dev.ftb.mods:ftb-library-neoforge:2111.1.1")
+                modImplementation("dev.ftb.mods:ftb-quests-neoforge:2111.1.5")
+                modImplementation("dev.ftb.mods:ftb-teams-neoforge:2111.1.1")
+                modImplementation("dev.architectury:architectury-neoforge:19.0.1")
+            }
+        }
     }
 }
 
-val supportedPackFormats = listOf(15, 18, 22, 34)
+val supportedPackFormats = listOf(15, 18, 22, 34, 86)
 val templatesDir = rootProject.layout.projectDirectory.dir("templates")
 val outputDir = rootProject.layout.buildDirectory.dir("resourcepacks")
 val targetShaderPath = "assets/certain_questing_additions/shaders/core/custom_background.fsh"
@@ -90,7 +122,7 @@ val zipTaskNames = mutableListOf<String>()
 templatesDir.asFileTree.files.filter { it.name.endsWith(".glsl") }.forEach { shaderFile ->
     val shaderName = shaderFile.nameWithoutExtension
     val taskName = "zipResourcePack${shaderName.capitalize()}"
-    val packDescription = "Шейдер '$shaderName' (1.20.1 - 1.21.1)"
+    val packDescription = "Шейдер '$shaderName' (1.20.1 - 1.21.11)"
 
     tasks.register<Zip>(taskName) {
         archiveFileName.set("resourcepack-${shaderName}-1.20_1.21.zip")
@@ -125,7 +157,7 @@ templatesDir.asFileTree.files.filter { it.name.endsWith(".glsl") }.forEach { sha
 
 tasks.register("createMultiVersionResourcePacks") {
     group = "resourcepack"
-    description = "Создает мультиверсионные ресурспаки (1.20.1 - 1.21.1) для каждого шейдера."
+    description = "Создает мультиверсионные ресурспаки (1.20.1 - 1.21.11) для каждого шейдера."
 
     dependsOn(zipTaskNames)
 }

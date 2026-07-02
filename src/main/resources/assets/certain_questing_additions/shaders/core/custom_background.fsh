@@ -73,7 +73,8 @@ void main() {
     if (scrollSize.x > 0.0) scrollPos.x = scrollOffset.x / scrollSize.x;
     if (scrollSize.y > 0.0) scrollPos.y = scrollOffset.y / scrollSize.y;
     fragColor = vec4(0.07, 0.09, 0.21, 1.0);
-    vec2 clouds_uv = zoomed_uv + (scrollPos * 0.01 * parallaxIntensity) / scale;
+    vec2 cloudDrift = vec2(time * 0.003, -time * 0.0015);
+    vec2 clouds_uv = zoomed_uv + (scrollPos * 0.01 * parallaxIntensity) / scale + cloudDrift;
     fragColor += clamp(vec4(0.29, 0.76, 1.00, 1.0) * clouds(clouds_uv), 0.0, 1.0);
     vec4 stars = vec4(0.0);
     for (float starsize = 3.0; starsize > 0.0; starsize -= 0.5) {

@@ -1,7 +1,12 @@
 package ru.hollowhorizon.additions.questing.client;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
+*///?}
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -21,7 +26,11 @@ public final class EntityIconConfigEntries {
     private EntityIconConfigEntries() {
     }
 
-    public static ConfigValue add(ConfigGroup group, String id, EntityIcon entityIcon, Consumer<EntityIcon> setter) {
+    //? if >= 1.21.11 {
+    public static EditableConfigValue<?> add(EditableConfigGroup group, String id, EntityIcon entityIcon, Consumer<EntityIcon> setter) {
+    //?} else {
+    /*public static ConfigValue add(ConfigGroup group, String id, EntityIcon entityIcon, Consumer<EntityIcon> setter) {
+    *///?}
         setEntityGroupName(group);
         AtomicReference<EntityIcon> current = new AtomicReference<>(entityIcon);
         Consumer<EntityIcon> updatingSetter = icon -> {
@@ -30,7 +39,11 @@ public final class EntityIconConfigEntries {
         };
 
         String entitySpec = entityIcon.getConfigString();
-        ConfigValue imageConfig = group.addString(id, entitySpec, value -> setEntityImage(value, current, updatingSetter), entitySpec)
+        //? if >= 1.21.11 {
+        EditableConfigValue<?> imageConfig = group.addString(id, entitySpec, value -> setEntityImage(value, current, updatingSetter), entitySpec)
+        //?} else {
+        /*ConfigValue imageConfig = group.addString(id, entitySpec, value -> setEntityImage(value, current, updatingSetter), entitySpec)
+        *///?}
                 .setNameKey(ENTITY_KEY);
         if (entityIcon.isPlayer()) {
             group.addString("entity_player_skin", entityIcon.getPlayerSkinName(), value -> updatePlayerSkin(current, updatingSetter, value), "")
@@ -47,7 +60,11 @@ public final class EntityIconConfigEntries {
         return imageConfig;
     }
 
-    public static void setEntityGroupName(ConfigGroup group) {
+    //? if >= 1.21.11 {
+    public static void setEntityGroupName(EditableConfigGroup group) {
+    //?} else {
+    /*public static void setEntityGroupName(ConfigGroup group) {
+    *///?}
         group.setNameKey(CONFIG_GROUP_KEY);
     }
 
@@ -55,17 +72,29 @@ public final class EntityIconConfigEntries {
         return "Entity: " + entityIcon;
     }
 
-    public static <T extends ConfigValue<?>> T setEntityTintName(T value) {
+    //? if >= 1.21.11 {
+    public static <T extends EditableConfigValue<?>> T setEntityTintName(T value) {
+    //?} else {
+    /*public static <T extends ConfigValue> T setEntityTintName(T value) {
+    *///?}
         value.setNameKey(ENTITY_TINT_KEY);
         return value;
     }
 
-    public static <T extends ConfigValue<?>> T setEntityOrderName(T value) {
+    //? if >= 1.21.11 {
+    public static <T extends EditableConfigValue<?>> T setEntityOrderName(T value) {
+    //?} else {
+    /*public static <T extends ConfigValue> T setEntityOrderName(T value) {
+    *///?}
         value.setNameKey(ENTITY_ORDER_KEY);
         return value;
     }
 
-    public static <T extends ConfigValue<?>> T setEntityAlphaName(T value) {
+    //? if >= 1.21.11 {
+    public static <T extends EditableConfigValue<?>> T setEntityAlphaName(T value) {
+    //?} else {
+    /*public static <T extends ConfigValue> T setEntityAlphaName(T value) {
+    *///?}
         value.setNameKey(ENTITY_ALPHA_KEY);
         return value;
     }

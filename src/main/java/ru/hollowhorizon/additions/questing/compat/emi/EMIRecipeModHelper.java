@@ -26,7 +26,9 @@ public final class EMIRecipeModHelper implements RecipeModHelper {
 
     @Override
     public void showRecipes(ItemStack itemStack) {
+        var questScreen = EmiQuestScreenReturn.captureCurrentQuestScreen();
         EmiApi.displayRecipes(EmiStack.of(itemStack));
+        EmiQuestScreenReturn.attachFallback(questScreen);
     }
 
     @Override

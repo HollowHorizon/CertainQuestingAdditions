@@ -1,6 +1,7 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
-import dev.ftb.mods.ftblibrary.icon.ImageIcon;
+//? if < 1.21.11 {
+/*import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,3 +24,7 @@ public abstract class ImageIconMixin {
         }
     }
 }
+*///?} else {
+public abstract class ImageIconMixin {
+}
+//?}

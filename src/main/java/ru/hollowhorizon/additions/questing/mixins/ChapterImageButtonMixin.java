@@ -3,8 +3,14 @@ package ru.hollowhorizon.additions.questing.mixins;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+//? if <= 1.20.1 {
+/*import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+*///?}
+//? if >= 1.21.11 {
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+//?} else {
+/*import dev.ftb.mods.ftblibrary.ui.Theme;
+*///?}
 import dev.ftb.mods.ftbquests.client.gui.quests.ChapterImageButton;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import net.minecraft.client.gui.DrawContext;

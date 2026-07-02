@@ -23,17 +23,33 @@ record EntityStateSnapshot(
         float livingPrevBodyYaw = 0F;
         if (entity instanceof LivingEntity living) {
             livingHeadYaw = living.headYaw;
-            livingPrevHeadYaw = living.prevHeadYaw;
+            //? if >= 1.21.11 {
+            livingPrevHeadYaw = living.lastHeadYaw;
+            //?} else {
+            /*livingPrevHeadYaw = living.prevHeadYaw;
+            *///?}
             livingBodyYaw = living.bodyYaw;
-            livingPrevBodyYaw = living.prevBodyYaw;
+            //? if >= 1.21.11 {
+            livingPrevBodyYaw = living.lastBodyYaw;
+            //?} else {
+            /*livingPrevBodyYaw = living.prevBodyYaw;
+            *///?}
         }
 
         return new EntityStateSnapshot(
                 entity.age,
                 entity.getYaw(),
-                entity.prevYaw,
+                //? if >= 1.21.11 {
+                entity.lastYaw,
+                //?} else {
+                /*entity.prevYaw,
+                *///?}
                 entity.getPitch(),
-                entity.prevPitch,
+                //? if >= 1.21.11 {
+                entity.lastPitch,
+                //?} else {
+                /*entity.prevPitch,
+                *///?}
                 entity.getHeadYaw(),
                 entity.getBodyYaw(),
                 livingHeadYaw,
@@ -46,17 +62,33 @@ record EntityStateSnapshot(
     void restore(Entity entity) {
         entity.age = age;
         entity.setYaw(yaw);
-        entity.prevYaw = prevYaw;
+        //? if >= 1.21.11 {
+        entity.lastYaw = prevYaw;
+        //?} else {
+        /*entity.prevYaw = prevYaw;
+        *///?}
         entity.setPitch(pitch);
-        entity.prevPitch = prevPitch;
+        //? if >= 1.21.11 {
+        entity.lastPitch = prevPitch;
+        //?} else {
+        /*entity.prevPitch = prevPitch;
+        *///?}
         entity.setHeadYaw(headYaw);
         entity.setBodyYaw(bodyYaw);
 
         if (entity instanceof LivingEntity living) {
             living.headYaw = livingHeadYaw;
-            living.prevHeadYaw = livingPrevHeadYaw;
+            //? if >= 1.21.11 {
+            living.lastHeadYaw = livingPrevHeadYaw;
+            //?} else {
+            /*living.prevHeadYaw = livingPrevHeadYaw;
+            *///?}
             living.bodyYaw = livingBodyYaw;
-            living.prevBodyYaw = livingPrevBodyYaw;
+            //? if >= 1.21.11 {
+            living.lastBodyYaw = livingPrevBodyYaw;
+            //?} else {
+            /*living.prevBodyYaw = livingPrevBodyYaw;
+            *///?}
         }
     }
 }
