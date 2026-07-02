@@ -3,16 +3,10 @@
 // Настройки качества
 #define PASS_COUNT 3   // Количество проходов для звезд (уменьши до 2 или 1, если будет лагать)
 
-uniform mat4 ModelViewMat;
-uniform mat4 ProjMat;
-uniform vec2 size;          // Screen resolution
-uniform vec2 scrollOffset;  // Current scroll X/Y
-uniform vec2 scrollSize;    // Total scrollable area
-uniform float time;         // Game time
-uniform float zoom;         // Current zoom level
-
 in vec2 texCoord0;
 out vec4 fragColor;
+
+#moj_import <certain_questing_additions:background_compat.glsl>
 
 // --- Galaxy Trip Constants & Variables ---
 float fBrightness = 2.5;

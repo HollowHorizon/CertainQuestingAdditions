@@ -1,5 +1,6 @@
 package ru.hollowhorizon.additions.questing.mixins;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 //? if >= 1.21.11 {
@@ -144,6 +145,9 @@ public abstract class QuestButtonMixin extends Button implements QuestButtonAnim
         float dy = (h * scale - h) / 2f;
 
         if (shape.shouldDraw()) {
+            //? if < 1.21.11 {
+            /*RenderSystem.enableBlend();
+            *///?}
             GuiMatrices.push(graphics);
             GuiMatrices.translate(graphics, x - dx, y - dy, 0);
             GuiMatrices.scale(graphics, scale, scale, scale);

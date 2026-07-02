@@ -19,6 +19,9 @@
     "ChapterPanelGroupButtonMixin",
     "ChapterPanelMixin",
     "ChapterPanelModpackButtonMixin",
+    //? if >= 1.21.11 {
+    "DrawContextAccessor",
+    //?}
     "EmiRecipeScreenMixin",
     //? if < 1.21.11 {
     /*"EntityRenderDispatcherAccessor",
@@ -43,6 +46,9 @@
     "QuestPanelMixin",
     "QuestScreenAccessor",
     "QuestScreenMixin",
+    //? if >= 1.21.11 {
+    "RenderPipelinesAccessor",
+    //?}
     "ViewQuestPanelMixin"
   ],
   "injectors": {

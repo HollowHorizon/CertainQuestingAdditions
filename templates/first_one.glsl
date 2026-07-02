@@ -2,17 +2,10 @@
 
 #define parallaxIntensity 5.0
 
-uniform mat4 ModelViewMat;
-uniform mat4 ProjMat;
-
-uniform vec2 size;          // Screen resolution
-uniform vec2 scrollOffset;  // Scroll position
-uniform vec2 scrollSize;    // Scrollable size
-uniform float time;         // Game time
-uniform float zoom;         // Zoom level
-
 in vec2 texCoord0;
 out vec4 fragColor;
+
+#moj_import <certain_questing_additions:background_compat.glsl>
 
 /* =======================
    HASH / RANDOM

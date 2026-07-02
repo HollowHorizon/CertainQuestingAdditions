@@ -6,7 +6,12 @@ package ru.hollowhorizon.additions.questing.fabric.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-//? if < 1.21.11 {
+//? if >= 1.21.11 {
+import net.minecraft.util.Identifier;
+import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
+import ru.hollowhorizon.additions.questing.mixins.RenderPipelinesAccessor;
+import ru.hollowhorizon.additions.questing.registry.ModShaders;
+//?} else {
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
@@ -26,7 +31,13 @@ public final class CertainQuestingAdditionsFabricClient implements ClientModInit
                 return 1;
             })));
         });
-        //? if < 1.21.11 {
+        //? if >= 1.21.11 {
+        for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
+            var pipeline = ModShaders.createPipeline(shaderId);
+            RenderPipelinesAccessor.cqa$register(pipeline);
+            ModShaders.register(shaderId, pipeline);
+        }
+        //?} else {
         CoreShaderRegistrationCallback.EVENT.register((CoreShaderRegistrationCallback.RegistrationContext context) -> {
             for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
                 context.register(shaderId, VertexFormats.POSITION_TEXTURE, shader -> ModShaders.register(shaderId, shader));

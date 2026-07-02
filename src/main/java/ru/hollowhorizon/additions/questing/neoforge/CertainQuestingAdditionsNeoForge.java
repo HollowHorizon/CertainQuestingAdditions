@@ -8,7 +8,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.render.VertexFormats;
 *///?}
 import net.minecraft.server.command.ServerCommandSource;
-//? if < 1.21.11 {
+//? if >= 1.21.11 {
+import net.minecraft.util.Identifier;
+//?} else {
 /*import net.minecraft.util.Identifier;
 *///?}
 import net.neoforged.api.distmarker.Dist;
@@ -16,16 +18,23 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+//? if >= 1.21.11 {
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+//?}
 //? if < 1.21.11 {
 /*import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 *///?}
 import net.neoforged.neoforge.common.NeoForge;
 import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
-//? if < 1.21.11 {
+//? if >= 1.21.11 {
+import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
+//?} else {
 /*import ru.hollowhorizon.additions.questing.client.ChapterShaderConfig;
 *///?}
 import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
-//? if < 1.21.11 {
+//? if >= 1.21.11 {
+import ru.hollowhorizon.additions.questing.registry.ModShaders;
+//?} else {
 /*import ru.hollowhorizon.additions.questing.registry.ModShaders;
 
 import java.io.IOException;
@@ -39,7 +48,15 @@ public class CertainQuestingAdditionsNeoForge {
 
         if (isClient()) {
             NeoForge.EVENT_BUS.addListener(CertainQuestingAdditionsNeoForge::onRegisterCommands);
-            //? if < 1.21.11 {
+            //? if >= 1.21.11 {
+            modBus.addListener((RegisterRenderPipelinesEvent event) -> {
+                for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
+                    var pipeline = ModShaders.createPipeline(shaderId);
+                    event.registerPipeline(pipeline);
+                    ModShaders.register(shaderId, pipeline);
+                }
+            });
+            //?} else {
             /*modBus.addListener((RegisterShadersEvent event) -> {
                 for (Identifier shaderId : ChapterShaderConfig.discoverShaderIdsForRegistration()) {
                     try {

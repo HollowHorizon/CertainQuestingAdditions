@@ -1,16 +1,10 @@
 #version 330
 #define parallaxIntensity 3.0
 
-uniform mat4 ModelViewMat;
-uniform mat4 ProjMat;
-uniform vec2 size;
-uniform vec2 scrollOffset;
-uniform vec2 scrollSize;
-uniform float time;
-uniform float zoom;
-
 in vec2 texCoord0;
 out vec4 fragColor;
+
+#moj_import <certain_questing_additions:background_compat.glsl>
 
 void main() {
     vec2 fragCoord = texCoord0 * size;

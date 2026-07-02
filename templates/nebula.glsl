@@ -1,16 +1,10 @@
 #version 330
 #define parallaxIntensity 4.0
 
-uniform mat4 ModelViewMat;
-uniform mat4 ProjMat;
-uniform vec2 size;
-uniform vec2 scrollOffset;
-uniform vec2 scrollSize;
-uniform float time;
-uniform float zoom;
-
 in vec2 texCoord0;
 out vec4 fragColor;
+
+#moj_import <certain_questing_additions:background_compat.glsl>
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(23.43, 45.17))) * 54321.0); }
 

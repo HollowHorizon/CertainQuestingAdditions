@@ -1,7 +1,16 @@
 package ru.hollowhorizon.additions.questing.client;
 
 import dev.ftb.mods.ftbquests.quest.Chapter;
-//? if < 1.21.11 {
+//? if >= 1.21.11 {
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState;
+import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.util.math.MathHelper;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fc;
+import ru.hollowhorizon.additions.questing.mixins.DrawContextAccessor;
+import ru.hollowhorizon.additions.questing.registry.ModShaders;
+//?} else {
 /*import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
@@ -18,7 +27,28 @@ import net.minecraft.client.gui.DrawContext;
 public class CustomBackgroundRenderer {
     public static void draw(DrawContext graphics, Chapter selectedChapter, int x, int y, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
         //? if >= 1.21.11 {
-        return;
+        var shaderId = ChapterShaderConfig.resolveShaderId(selectedChapter);
+        RenderPipeline pipeline = ModShaders.get(shaderId);
+        if (pipeline == null) {
+            return;
+        }
+
+        Matrix3x2f pose = new Matrix3x2f((Matrix3x2fc) graphics.getMatrices());
+        ((DrawContextAccessor) graphics).cqa$getState().addSimpleElement(new TexturedQuadGuiElementRenderState(
+                pipeline,
+                TextureSetup.empty(),
+                pose,
+                x,
+                y,
+                x + w,
+                y + h,
+                0F,
+                1F,
+                0F,
+                1F,
+                encodeShaderParameters(centerX, centerY, scrollWidth, scrollHeight, zoom),
+                null
+        ));
         //?} else if >= 1.21.1 {
         /*var shaderId = ChapterShaderConfig.resolveShaderId(selectedChapter);
         var shader = ModShaders.get(shaderId);
@@ -54,6 +84,19 @@ public class CustomBackgroundRenderer {
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         *///?}
     }
+
+    //? if >= 1.21.11 {
+    private static int encodeShaderParameters(double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {
+        int scrollX = normalizedByte(scrollWidth <= 0D ? 0D : centerX / scrollWidth);
+        int scrollY = normalizedByte(scrollHeight <= 0D ? 0D : centerY / scrollHeight);
+        int zoomValue = normalizedByte((zoom - 4F) / 24F);
+        return 0xFF000000 | scrollX << 16 | scrollY << 8 | zoomValue;
+    }
+
+    private static int normalizedByte(double value) {
+        return MathHelper.clamp((int) Math.round(value * 255D), 0, 255);
+    }
+    //?}
 
     //? if < 1.21.11 {
     /*private static void setupUniforms(ShaderProgram shader, int w, int h, double centerX, double centerY, double scrollWidth, double scrollHeight, float zoom) {

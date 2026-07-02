@@ -90,7 +90,16 @@ public abstract class QuestScreenMixin extends BaseScreen implements QuestScreen
         ApngTextureManager.clearCache();
     }
 
-    //? if < 1.21.11 {
+    //? if >= 1.21.11 {
+    @Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/client/gui/widget/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/client/gui/theme/Theme;IIII)V"), remap = true)
+    private void drawCustomBackground(BaseScreen instance, DrawContext graphics, Theme theme, int x, int y, int w, int h) {
+        if (QuestAnimationsConfig.SHADER_BACKGROUND.get()) {
+            CustomBackgroundRenderer.draw(graphics, selectedChapter, x, y, w, h, questPanel.getScrollX(), questPanel.getScrollY(), scrollWidth, scrollHeight, cqa$getZoom());
+        } else {
+            super.drawBackground(graphics, theme, x, y, w, h);
+        }
+    }
+    //?} else {
     /*@Redirect(method = "drawBackground", at= @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/ui/BaseScreen;drawBackground(Lnet/minecraft/client/gui/DrawContext;Ldev/ftb/mods/ftblibrary/ui/Theme;IIII)V"), remap = true)
     private void drawCustomBackground(BaseScreen instance, DrawContext graphics, Theme theme, int x, int y, int w, int h) {
         if (QuestAnimationsConfig.SHADER_BACKGROUND.get()) {
