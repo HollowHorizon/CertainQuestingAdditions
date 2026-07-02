@@ -11,6 +11,12 @@ if (userPropertiesFile.exists()) {
     properties.load(userPropertiesFile.inputStream())
 }
 
+fun publishToken(propertyName: String, environmentName: String): String? {
+    return properties.getProperty(propertyName)
+        ?: providers.gradleProperty(propertyName).orNull
+        ?: providers.environmentVariable(environmentName).orNull
+}
+
 afterEvaluate {
     tasks.withType<Jar> {
         manifest {
@@ -167,7 +173,7 @@ publishMods {
 
     modrinth {
         projectId = "5BPpCYUe"
-        accessToken = properties.getProperty("modrinthToken")
+        accessToken = publishToken("modrinthToken", "MODRINTH_TOKEN")
         minecraftVersions.set(listOf(mod.minecraftVersion))
         version.set(mod.version)
         modLoaders.set(listOf(mod.loader))
@@ -177,7 +183,7 @@ publishMods {
 
     curseforge {
         projectId = "1372051"
-        accessToken = properties.getProperty("curseforgeToken")
+        accessToken = publishToken("curseforgeToken", "CURSEFORGE_TOKEN")
 
         minecraftVersions.set(listOf(mod.minecraftVersion))
         version.set(mod.version)

@@ -16,6 +16,9 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
       - name: Get the mod version from gradle.properties
         id: get_version
         run: |
@@ -30,11 +33,16 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: 9.4.0
 
       - name: Build
-        run: gradle chiseledBuildAndCollect --no-daemon
+        run: ./gradlew chiseledBuildAndCollect --no-daemon
+
+      - name: Publish to Modrinth and CurseForge
+        if: ${{ contains(join(github.event.commits.*.message, '\n'), '[publish]') }}
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: ./gradlew chiseledPublishMods --no-daemon
 
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' && matrix.java == '21' }}

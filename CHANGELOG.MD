@@ -1,1 +1,3 @@
-- Fix quest button hovering when selected.
+- EMI back button fixes;
+- Entity icon rendering feature;
+- Quest button blending fix.
