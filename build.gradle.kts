@@ -41,16 +41,6 @@ repositories {
     }
 }
 
-sourceSets {
-    named("main") {
-        resources.setSrcDirs(listOf(layout.buildDirectory.dir("generated/stonecutter/main/resources")))
-    }
-}
-
-tasks.named<Copy>("processResources") {
-    dependsOn("stonecutterGenerate")
-}
-
 dependencies {
     val platform = stonecutter.current.project.substringAfterLast('-')
     val version = stonecutter.current.project.substringBeforeLast('-')
@@ -68,7 +58,7 @@ dependencies {
         "1.20.1" -> {
             if (platform == "fabric") {
                 modImplementation("lib:ftb-library-fabric:2001.2.10")
-                modImplementation("lib:ftb-quests-fabric:2001.4.14")
+                modImplementation("lib:ftb-quests-fabric:2001.4.22")
                 modImplementation("lib:ftb-teams-fabric:2001.3.1")
                 modImplementation("dev.architectury:architectury-fabric:9.2.14")
                 modRuntimeOnly("teamreborn:energy:3.0.0")
@@ -76,13 +66,13 @@ dependencies {
                 val mixinExtrasVersion = "0.5.0"
 
                 modImplementation("lib:ftb-library-forge:2001.2.10")
-                modImplementation("lib:ftb-quests-forge:2001.4.14")
+                modImplementation("lib:ftb-quests-forge:2001.4.22")
                 modImplementation("lib:ftb-teams-forge:2001.3.1")
                 modImplementation("lib:architectury:9.2.14-forge")
                 annotationProcessor("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
                 compileOnly("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
-                add("forgeRuntimeLibrary", "io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
-                include("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
+                add("forgeRuntimeLibrary", "io.github.llamalad7:mixinextras-forge:$mixinExtrasVersion")
+                include("io.github.llamalad7:mixinextras-forge:$mixinExtrasVersion")
             }
         }
 
@@ -115,6 +105,16 @@ dependencies {
                 modImplementation("dev.architectury:architectury-neoforge:19.0.1")
             }
         }
+    }
+}
+
+loom {
+    val platform = stonecutter.current.project.substringAfterLast('-')
+    val version = stonecutter.current.project.substringBeforeLast('-')
+
+    if(version == "1.20.1" || (version == "1.21.1" && platform == "fabric")) {
+        mixin.useLegacyMixinAp.set(true)
+        mixin.add(sourceSets.named("main").get(), "certain-questing-additions.refmap.json")
     }
 }
 

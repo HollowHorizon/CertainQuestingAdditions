@@ -4,6 +4,7 @@ package ru.hollowhorizon.additions.questing.config;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ConfigUtil;
+import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.config.serializer.SNBTConfigSerializer;
 import dev.ftb.mods.ftblibrary.config.value.BooleanValue;
 import dev.ftb.mods.ftblibrary.config.value.Config;
@@ -97,6 +98,7 @@ public interface QuestAnimationsConfig {
         //? if >= 1.21.11 {
         try {
             SNBTConfigSerializer.readFromFile(CONFIG, configPath());
+            ConfigManager.getInstance().registerClientConfig(CONFIG, "certain_questing_additions");
         } catch (IOException e) {
             CertainQuestingAdditions.LOGGER.warn("Failed to read config {}, saving defaults.", configPath(), e);
             saveConfig();

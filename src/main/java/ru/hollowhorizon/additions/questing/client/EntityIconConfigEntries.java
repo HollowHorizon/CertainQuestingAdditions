@@ -68,10 +68,6 @@ public final class EntityIconConfigEntries {
         group.setNameKey(CONFIG_GROUP_KEY);
     }
 
-    public static String editScreenTitle(EntityIcon entityIcon) {
-        return "Entity: " + entityIcon;
-    }
-
     //? if >= 1.21.11 {
     public static <T extends EditableConfigValue<?>> T setEntityTintName(T value) {
     //?} else {

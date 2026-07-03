@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,6 +13,7 @@ import ru.hollowhorizon.additions.questing.client.EmiRecipeScreenFallback;
 
 import java.util.Map;
 
+@Pseudo
 @Mixin(targets = "dev.emi.emi.screen.RecipeScreen", remap = false)
 public abstract class EmiRecipeScreenMixin implements EmiRecipeScreenFallback {
     @Unique

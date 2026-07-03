@@ -24,8 +24,6 @@ import ru.hollowhorizon.additions.questing.client.EntityIconConfigEntries;
 
 @Mixin(value = ChapterImageButton.class, remap = false)
 public abstract class ChapterImageButtonMixin {
-    @Shadow @Final private ChapterImage chapterImage;
-
     @WrapMethod(method = "draw")
     private void cqa$withCanvasApngScope(DrawContext graphics, Theme theme, int x, int y, int w, int h, Operation<Void> original) {
         ApngTextureManager.pushScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
@@ -35,15 +33,4 @@ public abstract class ChapterImageButtonMixin {
             ApngTextureManager.popScope(ApngTextureManager.ApngScope.QUEST_SCREEN_CANVAS);
         }
     }
-
-    //? if <= 1.20.1 {
-    /*@WrapOperation(method = "lambda$onClicked$1", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/config/ConfigGroup;setNameKey(Ljava/lang/String;)Ldev/ftb/mods/ftblibrary/config/ConfigGroup;"))
-    private ConfigGroup cqa$renameEntityCanvasConfigTitle(ConfigGroup group, String key, Operation<ConfigGroup> original) {
-        if (chapterImage.getImage() instanceof EntityIcon entityIcon) {
-            return original.call(group, EntityIconConfigEntries.editScreenTitle(entityIcon));
-        }
-
-        return original.call(group, key);
-    }
-    *///?}
 }
