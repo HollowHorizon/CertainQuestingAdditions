@@ -6,7 +6,7 @@ license = "All Rights Reserved"
 modId = "${id}"
 version = "${version}"
 displayName = "${name}"
-authors = "Meza"
+authors = "HollowHorizon"
 description = '''
 ${description}
 '''

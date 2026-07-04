@@ -14,7 +14,7 @@ import ru.hollowhorizon.additions.questing.client.EmiRecipeScreenFallback;
 import java.util.Map;
 
 @Pseudo
-@Mixin(targets = "dev.emi.emi.screen.RecipeScreen", remap = false)
+@Mixin(targets = "dev.emi.emi.screen.RecipeScreen")
 public abstract class EmiRecipeScreenMixin implements EmiRecipeScreenFallback {
     @Unique
     private Screen cqa$fallbackScreen;
@@ -37,7 +37,7 @@ public abstract class EmiRecipeScreenMixin implements EmiRecipeScreenFallback {
         cqa$fallbackScreen = fallbackScreen;
     }
 
-    @Inject(method = "close", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = {"close", "method_25419", "onClose", "m_7379_"}, at = @At("HEAD"), cancellable = true)
     private void cqa$restoreFallbackScreen(CallbackInfo ci) {
         if (cqa$fallbackScreen == null) {
             return;

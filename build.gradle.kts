@@ -112,7 +112,7 @@ loom {
     val platform = stonecutter.current.project.substringAfterLast('-')
     val version = stonecutter.current.project.substringBeforeLast('-')
 
-    if(version == "1.20.1" || (version == "1.21.1" && platform == "fabric")) {
+    if(version != "1.21.11") {
         mixin.useLegacyMixinAp.set(true)
         mixin.add(sourceSets.named("main").get(), "certain-questing-additions.refmap.json")
     }

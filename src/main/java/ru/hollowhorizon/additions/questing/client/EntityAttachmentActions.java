@@ -1,6 +1,8 @@
 package ru.hollowhorizon.additions.questing.client;
 
 //? if >= 1.21.11 {
+import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 //?} else {
@@ -95,7 +97,11 @@ public final class EntityAttachmentActions {
                 .setImage(icon)
                 .setPosition(questX, questY);
         image.fixupAspectRatio(true);
-        chapter.addImage(image);
+        //? if >= 1.21.11 {
+        NetworkManager.sendToServer(CreateObjectMessage.create(image, null));
+        //?} else {
+        /*chapter.addImage(image);
+        *///?}
         sendEditObject(chapter);
         screen.refreshQuestPanel();
     }
@@ -120,10 +126,6 @@ public final class EntityAttachmentActions {
                 panel.getGui(),
                 config,
                 accepted -> {
-                    if (!accepted) {
-                        return;
-                    }
-
                     String value = config.getValue();
                     EntityIcon.fromRegisteredEntityId(value).ifPresentOrElse(
                             onAccepted,
