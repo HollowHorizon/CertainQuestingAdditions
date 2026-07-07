@@ -10,14 +10,6 @@ import net.minecraft.item.ItemStack;
 import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
 
 public final class EMIRecipeModHelper implements RecipeModHelper {
-    public static void setRecipeModHelper() {
-        try {
-            FTBQuests.setRecipeModHelper(new EMIRecipeModHelper());
-        } catch (IllegalStateException e) {
-            CertainQuestingAdditions.LOGGER.warn("Failed to set recipe mod helper, there is already helper ({}) set by another mod.", FTBQuests.getRecipeModHelper().getClass().getSimpleName());
-        }
-    }
-
     @Override
     public void refreshAll(Components components) {}
 

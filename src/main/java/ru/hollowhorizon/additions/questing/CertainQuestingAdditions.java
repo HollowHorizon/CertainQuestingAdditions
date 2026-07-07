@@ -8,30 +8,31 @@ import ru.hollowhorizon.additions.questing.config.QuestAnimationsConfig;
 public final class CertainQuestingAdditions {
     public static final String MOD_ID = "certain_questing_additions";
     public static final Logger LOGGER = LogManager.getLogger("CertainQuestingAdditions");
+    private static EMIRecipeModHelper helper = null;
 
     public static void init() {
         QuestAnimationsConfig.init();
 
-        //? if forge {
-        /*boolean isEmiLoaded = net.minecraftforge.fml.ModList.get().isLoaded("emi");
-        *///?} elif fabric {
-        /*boolean isEmiLoaded = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("emi");
-        *///?} elif neoforge {
-        boolean isEmiLoaded = net.neoforged.fml.ModList.get().isLoaded("emi");
-        //?}
-
-        //? if forge {
-        /*boolean isJeiLoaded = net.minecraftforge.fml.ModList.get().isLoaded("jei");
-        *///?} elif fabric {
-        /*boolean isJeiLoaded = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jei");
-        *///?} elif neoforge {
-        boolean isJeiLoaded = net.neoforged.fml.ModList.get().isLoaded("jei");
-        //?}
-
-
-
-        if(isEmiLoaded && !isJeiLoaded) {
-            EMIRecipeModHelper.setRecipeModHelper();
+        if (isLoaded("emi")) {
+            helper = new EMIRecipeModHelper();
         }
+    }
+
+    public static EMIRecipeModHelper getRecipeModHelperOrNull() {
+        if (isLoaded("emi")) {
+            return helper;
+        } else {
+            return null;
+        }
+    }
+
+    public static boolean isLoaded(String mod) {
+        //? if forge {
+        /*return net.minecraftforge.fml.ModList.get().isLoaded(mod);
+         *///?} elif fabric {
+        /*return net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(mod);
+         *///?} elif neoforge {
+        return net.neoforged.fml.ModList.get().isLoaded(mod);
+        //?}
     }
 }

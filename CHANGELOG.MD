@@ -1,2 +1,1 @@
-Fixed entity icon saving on 1.21.11;
-Fixed EMI integration mixin.
+Fixed EMI / JEI / TooManyRecipeViewers / XMod Compat integrations

@@ -11,6 +11,7 @@
     "ButtonAccessor",
     "ChapterPanelAccessor",
     "ChapterImageButtonMixin",
+    "FTBQuestsMixin",
     //? if >= 1.21.1 {
     "ChapterImageConfigGroupMixin",
     //?}
