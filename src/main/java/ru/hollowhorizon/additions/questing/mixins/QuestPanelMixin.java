@@ -79,7 +79,7 @@ public abstract class QuestPanelMixin extends Panel {
         throw new AssertionError();
     }
     //?} else if >= 1.21.1 {
-    /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
+    /*@Shadow protected abstract void renderConnection(QuestButton startWidget, QuestButton endWidget, MatrixStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
     *///?} else {
     /*@Shadow protected abstract void renderConnection(Widget widget, QuestButton button, MatrixStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tessellator tesselator);
     *///?}
@@ -158,13 +158,18 @@ public abstract class QuestPanelMixin extends Panel {
                             c = c.withAlpha(Math.max(30, c.alphai() / 2));
                         }
 
-                        for(QuestButton button : qb.getDependencies()) {
+                        //? if 1.21.1 {
+                        /*var collection = qb.getDependencies().values();
+                        *///?} else {
+                        var collection = qb.getDependencies();
+                        //?}
+                        for(QuestButton button : collection) {
                             var dependentQuest = ((QuestButtonAccessor) button).getQuest();
                             if (button.shouldDraw() && quest != selectedQuest && dependentQuest != selectedQuest && !dependentQuest.shouldHideDependentLines()) {
                                 //? if >= 1.21.11 {
                                 this.renderConnection(graphics, dependencyLineIcon, widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu);
                                 //?} else {
-                                /*this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu, tesselator);
+                                /*this.renderConnection(qb, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), mu, tesselator);
                                 *///?}
                             }
                         }
@@ -179,7 +184,12 @@ public abstract class QuestPanelMixin extends Panel {
                 if (widget.shouldDraw() && widget instanceof QuestButton qb) {
                     var quest = ((QuestButtonAccessor) qb).getQuest();
                     if (!quest.shouldHideDependencyLines() || qb.isMouseOver()) {
-                        for(QuestButton button : qb.getDependencies()) {
+                        //? if 1.21.1 {
+                        /*var collection = qb.getDependencies().values();
+                        *///?} else {
+                        var collection = qb.getDependencies();
+                         //?}
+                        for(QuestButton button : collection) {
                             if (button.shouldDraw()) {
                                 boolean unavailable = !file.selfTeamData.canStartTasks(quest);
                                 boolean complete = !unavailable && file.selfTeamData.isCompleted(quest);
@@ -190,7 +200,7 @@ public abstract class QuestPanelMixin extends Panel {
                                         //? if >= 1.21.11 {
                                         this.renderConnection(graphics, dependencyLineIcon, widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms);
                                         //?} else {
-                                        /*this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+                                        /*this.renderConnection(qb, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
                                         *///?}
                                     }
                                 } else {
@@ -208,7 +218,7 @@ public abstract class QuestPanelMixin extends Panel {
                                     //? if >= 1.21.11 {
                                     this.renderConnection(graphics, dependencyLineIcon, widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms);
                                     //?} else {
-                                    /*this.renderConnection(widget, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+                                    /*this.renderConnection(qb, button, graphics.getMatrices(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
                                     *///?}
                                 }
                             }

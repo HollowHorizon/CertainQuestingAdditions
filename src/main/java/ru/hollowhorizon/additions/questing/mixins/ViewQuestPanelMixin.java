@@ -127,11 +127,7 @@ public abstract class ViewQuestPanelMixin extends ModalPanel implements QuestPan
 
     //? if >= 1.21.11 {
     @WrapOperation(method = "editImage", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/client/config/EditableConfigGroup;add(Ljava/lang/String;Ldev/ftb/mods/ftblibrary/client/config/editable/EditableConfigValue;Ljava/lang/Object;Ljava/util/function/Consumer;Ljava/lang/Object;)Ldev/ftb/mods/ftblibrary/client/config/editable/EditableConfigValue;", ordinal = 0))
-    //?} else {
-    /*@WrapOperation(method = "editImage", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/config/ConfigGroup;add(Ljava/lang/String;Ldev/ftb/mods/ftblibrary/config/ConfigValue;Ljava/lang/Object;Ljava/util/function/Consumer;Ljava/lang/Object;)Ldev/ftb/mods/ftblibrary/config/ConfigValue;", ordinal = 0))
-    *///?}
     @SuppressWarnings({"rawtypes"})
-    //? if >= 1.21.11 {
     private EditableConfigValue<?> cqa$useEntityDescriptionImageConfig(
             EditableConfigGroup group,
             String id,
@@ -143,8 +139,31 @@ public abstract class ViewQuestPanelMixin extends ModalPanel implements QuestPan
             int line,
             ImageComponent component
     ) {
-    //?} else {
-    /*private ConfigValue cqa$useEntityDescriptionImageConfig(
+        Icon image = cqa$getImage(component);
+        if (image instanceof EntityIcon entityIcon) {
+            return EntityIconConfigEntries.add(group, id, entityIcon, icon -> cqa$setImage(component, icon));
+        }
+
+        return original.call(group, id, type, value, setter, defaultValue);
+    }
+    //?} else if >= 1.21.1 {
+    /*@WrapOperation(method = "editImage", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftbquests/client/gui/ImageComponentWidget;makeEditGroup(Ldev/ftb/mods/ftblibrary/util/client/ImageComponent;Ldev/ftb/mods/ftblibrary/config/ConfigCallback;)Ldev/ftb/mods/ftblibrary/config/ConfigGroup;"))
+    private ConfigGroup cqa$useEntityDescriptionImageConfig(
+            ImageComponent component,
+            dev.ftb.mods.ftblibrary.config.ConfigCallback callback,
+            Operation<ConfigGroup> original
+    ) {
+        ConfigGroup group = original.call(component, callback);
+        Icon image = cqa$getImage(component);
+        if (image instanceof EntityIcon entityIcon) {
+            EntityIconConfigEntries.add(group, "image", entityIcon, icon -> cqa$setImage(component, icon));
+        }
+        return group;
+    }
+    *///?} else {
+    /*@WrapOperation(method = "editImage", at = @At(value = "INVOKE", target = "Ldev/ftb/mods/ftblibrary/config/ConfigGroup;add(Ljava/lang/String;Ldev/ftb/mods/ftblibrary/config/ConfigValue;Ljava/lang/Object;Ljava/util/function/Consumer;Ljava/lang/Object;)Ldev/ftb/mods/ftblibrary/config/ConfigValue;", ordinal = 0))
+    @SuppressWarnings({"rawtypes"})
+    private ConfigValue cqa$useEntityDescriptionImageConfig(
             ConfigGroup group,
             String id,
             ConfigValue type,
@@ -155,7 +174,6 @@ public abstract class ViewQuestPanelMixin extends ModalPanel implements QuestPan
             int line,
             ImageComponent component
     ) {
-    *///?}
         Icon image = cqa$getImage(component);
         if (image instanceof EntityIcon entityIcon) {
             return EntityIconConfigEntries.add(group, id, entityIcon, icon -> cqa$setImage(component, icon));
@@ -163,6 +181,7 @@ public abstract class ViewQuestPanelMixin extends ModalPanel implements QuestPan
 
         return original.call(group, id, type, value, setter, defaultValue);
     }
+    *///?}
 
     @Unique
     private void cqa$appendEntityDescription(EntityIcon icon) {

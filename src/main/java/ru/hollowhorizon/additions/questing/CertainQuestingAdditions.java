@@ -30,9 +30,9 @@ public final class CertainQuestingAdditions {
         //? if forge {
         /*return net.minecraftforge.fml.ModList.get().isLoaded(mod);
          *///?} elif fabric {
-        /*return net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(mod);
-         *///?} elif neoforge {
-        return net.neoforged.fml.ModList.get().isLoaded(mod);
-        //?}
+        return net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(mod);
+         //?} elif neoforge {
+        /*return net.neoforged.fml.ModList.get().isLoaded(mod);
+        *///?}
     }
 }
