@@ -1,7 +1,7 @@
 package ru.hollowhorizon.additions.questing.fabric;
 
 //? if fabric {
-import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
+/*import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
 import net.fabricmc.api.ModInitializer;
 
 public final class CertainQuestingAdditionsFabric implements ModInitializer {
@@ -15,6 +15,6 @@ public final class CertainQuestingAdditionsFabric implements ModInitializer {
         CertainQuestingAdditions.init();
     }
 }
-//?} else {
-/*public final class CertainQuestingAdditionsFabric {}
-*///?}
+*///?} else {
+public final class CertainQuestingAdditionsFabric {}
+//?}
