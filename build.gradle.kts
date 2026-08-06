@@ -56,19 +56,23 @@ dependencies {
 
     when (version) {
         "1.20.1" -> {
+            val ftblib = "2001.2.10"
+            val ftbquest = "2001.4.22"
+            val ftbteams = "2001.3.1"
+            val arch = "9.2.14"
             if (platform == "fabric") {
-                modImplementation("lib:ftb-library-fabric:2001.2.10")
-                modImplementation("lib:ftb-quests-fabric:2001.4.22")
-                modImplementation("lib:ftb-teams-fabric:2001.3.1")
-                modImplementation("dev.architectury:architectury-fabric:9.2.14")
+                modImplementation("lib:ftb-library-fabric:$ftblib")
+                modImplementation("lib:ftb-quests-fabric:$ftbquest")
+                modImplementation("lib:ftb-teams-fabric:$ftbteams")
+                modImplementation("dev.architectury:architectury-fabric:$arch")
                 modRuntimeOnly("teamreborn:energy:3.0.0")
             } else {
                 val mixinExtrasVersion = "0.5.0"
 
-                modImplementation("lib:ftb-library-forge:2001.2.10")
-                modImplementation("lib:ftb-quests-forge:2001.4.22")
-                modImplementation("lib:ftb-teams-forge:2001.3.1")
-                modImplementation("lib:architectury:9.2.14-forge")
+                modImplementation("lib:ftb-library-forge:$ftblib")
+                modImplementation("lib:ftb-quests-forge:$ftbquest")
+                modImplementation("lib:ftb-teams-forge:$ftbteams")
+                modImplementation("lib:architectury:$arch-forge")
                 annotationProcessor("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
                 compileOnly("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
                 add("forgeRuntimeLibrary", "io.github.llamalad7:mixinextras-forge:$mixinExtrasVersion")
@@ -77,32 +81,40 @@ dependencies {
         }
 
         "1.21.1" -> {
+            val ftblib = "2101.1.34"
+            val ftbquest = "2101.1.29"
+            val ftbteams = "2101.1.10"
+            val arch = "13.0.8"
             if (platform == "fabric") {
-                modImplementation("lib:ftb-library-fabric:2101.1.20")
-                modImplementation("lib:ftb-quests-fabric:2101.1.15")
-                modImplementation("lib:ftb-teams-fabric:2101.1.4")
-                modImplementation("dev.architectury:architectury-fabric:13.0.8")
+                modImplementation("lib:ftb-library-fabric:$ftblib")
+                modImplementation("lib:ftb-quests-fabric:$ftbquest")
+                modImplementation("lib:ftb-teams-fabric:$ftbteams")
+                modImplementation("dev.architectury:architectury-fabric:$arch")
                 modRuntimeOnly("teamreborn:energy:4.1.0")
             } else {
-                modImplementation("lib:ftb-library-neoforge:2101.1.20")
-                modImplementation("lib:ftb-quests-neoforge:2101.1.15")
-                modImplementation("lib:ftb-teams-neoforge:2101.1.4")
-                modImplementation("lib:architectury:13.0.8-neoforge")
+                modImplementation("lib:ftb-library-neoforge:$ftblib")
+                modImplementation("lib:ftb-quests-neoforge:$ftbquest")
+                modImplementation("lib:ftb-teams-neoforge:$ftbteams")
+                modImplementation("lib:architectury:$arch-neoforge")
             }
         }
 
         "1.21.11" -> {
+            val ftblib = "2111.1.1"
+            val ftbquest = "2111.1.5"
+            val ftbteams = "2111.1.1"
+            val arch = "19.0.1"
             if (platform == "fabric") {
-                modImplementation("dev.ftb.mods:ftb-library-fabric:2111.1.1")
-                modImplementation("dev.ftb.mods:ftb-quests-fabric:2111.1.5")
-                modImplementation("dev.ftb.mods:ftb-teams-fabric:2111.1.1")
-                modImplementation("dev.architectury:architectury-fabric:19.0.1")
+                modImplementation("dev.ftb.mods:ftb-library-fabric:$ftblib")
+                modImplementation("dev.ftb.mods:ftb-quests-fabric:$ftbquest")
+                modImplementation("dev.ftb.mods:ftb-teams-fabric:$ftbteams")
+                modImplementation("dev.architectury:architectury-fabric:$arch")
                 modRuntimeOnly("teamreborn:energy:4.1.0")
             } else {
-                modImplementation("dev.ftb.mods:ftb-library-neoforge:2111.1.1")
-                modImplementation("dev.ftb.mods:ftb-quests-neoforge:2111.1.5")
-                modImplementation("dev.ftb.mods:ftb-teams-neoforge:2111.1.1")
-                modImplementation("dev.architectury:architectury-neoforge:19.0.1")
+                modImplementation("dev.ftb.mods:ftb-library-neoforge:$ftblib")
+                modImplementation("dev.ftb.mods:ftb-quests-neoforge:$ftbquest")
+                modImplementation("dev.ftb.mods:ftb-teams-neoforge:$ftbteams")
+                modImplementation("dev.architectury:architectury-neoforge:$arch")
             }
         }
     }

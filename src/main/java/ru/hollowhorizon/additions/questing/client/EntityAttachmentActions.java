@@ -107,7 +107,7 @@ public final class EntityAttachmentActions {
     }
 
     private static ChapterImage createChapterImage(Chapter chapter) {
-        //? if >= 1.21.11 {
+        //? if >= 1.21.1 {
         return new ChapterImage(chapter.getQuestFile().newID(), chapter);
         //?} else {
         /*return new ChapterImage(chapter);

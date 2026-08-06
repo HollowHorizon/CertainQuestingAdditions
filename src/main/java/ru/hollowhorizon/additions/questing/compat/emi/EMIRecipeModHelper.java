@@ -1,13 +1,10 @@
 package ru.hollowhorizon.additions.questing.compat.emi;
 
-
 import dev.emi.emi.api.EmiApi;
 import dev.emi.emi.api.stack.EmiStack;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.item.ItemStack;
-import ru.hollowhorizon.additions.questing.CertainQuestingAdditions;
 
 public final class EMIRecipeModHelper implements RecipeModHelper {
     @Override
@@ -32,4 +29,19 @@ public final class EMIRecipeModHelper implements RecipeModHelper {
     public boolean isRecipeModAvailable() {
         return true;
     }
+
+    //? if 1.21.1 {
+    /*@Override
+    public void showRecipes(dev.architectury.fluid.FluidStack fluidStack) {}
+
+    @Override
+    public dev.ftb.mods.ftblibrary.config.Tristate toggleBookmark(ItemStack itemStack) {
+        return null;
+    }
+
+    @Override
+    public boolean isBookmarkKey(dev.ftb.mods.ftblibrary.ui.input.Key key) {
+        return false;
+    }
+    *///?}
 }
