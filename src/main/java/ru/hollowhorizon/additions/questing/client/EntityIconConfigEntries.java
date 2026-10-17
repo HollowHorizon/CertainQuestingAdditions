@@ -26,6 +26,10 @@ public final class EntityIconConfigEntries {
     private EntityIconConfigEntries() {
     }
 
+    public static String getGroupNameKey() {
+        return CONFIG_GROUP_KEY;
+    }
+
     //? if >= 1.21.11 {
     public static EditableConfigValue<?> add(EditableConfigGroup group, String id, EntityIcon entityIcon, Consumer<EntityIcon> setter) {
     //?} else {

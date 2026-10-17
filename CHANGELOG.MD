@@ -1,1 +1,1 @@
-Fixed EMI / JEI / TooManyRecipeViewers / XMod Compat integrations
+Fixed latest FTB Quests version incompatibility on 1.21.1.

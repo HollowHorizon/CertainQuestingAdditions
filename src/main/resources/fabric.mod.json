@@ -28,7 +28,7 @@
     "minecraft": ">=${minecraftVersion}",
     "java": ">=17",
     "architectury": ">=9.2.14",
-    "ftbquests": ">=2001.4.14",
+    "ftbquests": ">=@ftbquests_min_version@",
     "fabric-api": "*"
   },
   "suggests": {

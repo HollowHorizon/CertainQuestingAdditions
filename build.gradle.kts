@@ -1,4 +1,6 @@
 import gg.meza.stonecraft.mod
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.language.jvm.tasks.ProcessResources
 import java.util.*
 
 plugins {
@@ -15,6 +17,20 @@ fun publishToken(propertyName: String, environmentName: String): String? {
     return properties.getProperty(propertyName)
         ?: providers.gradleProperty(propertyName).orNull
         ?: providers.environmentVariable(environmentName).orNull
+}
+
+val ftbQuestsMinimumVersion = when (stonecutter.current.project.substringBeforeLast('-')) {
+    "1.20.1" -> "2001.4.14"
+    "1.21.1" -> "2101.1.15"
+    "1.21.11" -> "2111.1.5"
+    else -> error("No minimum FTB Quests version configured for ${stonecutter.current.project}")
+}
+
+tasks.named<ProcessResources>("processResources") {
+    inputs.property("ftbQuestsMinimumVersion", ftbQuestsMinimumVersion)
+    filesMatching(listOf("fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
+        filter<ReplaceTokens>("tokens" to mapOf("ftbquests_min_version" to ftbQuestsMinimumVersion))
+    }
 }
 
 afterEvaluate {
@@ -81,9 +97,9 @@ dependencies {
         }
 
         "1.21.1" -> {
-            val ftblib = "2101.1.34"
-            val ftbquest = "2101.1.29"
-            val ftbteams = "2101.1.10"
+            val ftblib = "2101.1.37"
+            val ftbquest = "2101.1.36"
+            val ftbteams = "2101.1.11"
             val arch = "13.0.8"
             if (platform == "fabric") {
                 modImplementation("lib:ftb-library-fabric:$ftblib")

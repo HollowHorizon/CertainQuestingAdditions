@@ -38,6 +38,6 @@ side = "BOTH"
 [[dependencies.${id}]]
 modId = "ftbquests"
 mandatory = true
-versionRange = "[2001.4.14,)"
+versionRange = "[@ftbquests_min_version@,)"
 ordering = "AFTER"
 side = "BOTH"
